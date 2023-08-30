@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name "mai_button")(type "KiCad")(uri "${KIPRJMOD}/mai_button.pretty")(options "")(descr ""))
+  (lib (name "Switch_Keyboard_Kailh")(type "KiCad")(uri "${KIPRJMOD}/Switch_Keyboard_Kailh.pretty")(options "")(descr ""))
+)

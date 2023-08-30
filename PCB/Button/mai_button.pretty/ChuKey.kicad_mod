@@ -1,0 +1,14 @@
+(footprint "ChuKey" (version 20211014) (generator pcbnew)
+  (layer "F.Cu")
+  (tedit 0)
+  (attr smd)
+  (fp_text reference "REF**" (at 0 -14.3 unlocked) (layer "F.SilkS") hide
+    (effects (font (size 1 1) (thickness 0.15)))
+    (tstamp 4d1b571a-6738-4483-a586-88528a43ea85)
+  )
+  (fp_text value "ChuKey" (at 0 14.4 unlocked) (layer "F.Fab") hide
+    (effects (font (size 1 1) (thickness 0.15)))
+    (tstamp a78c44d6-409f-4574-88da-bbfbb5d29d39)
+  )
+  (pad "1" smd roundrect (at 0 0) (size 13.6 25.2) (layers "F.Cu") (roundrect_rratio 0.01923076923) (tstamp c91a4918-7c7b-44c4-a8fe-15b574de971a))
+)
