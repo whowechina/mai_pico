@@ -3,202 +3,183 @@
  * WHowe <github.com/whowechina>
  */
 
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "pico/stdio.h"
+#include "pico/stdlib.h"
 #include "bsp/board.h"
 #include "pico/multicore.h"
 #include "pico/bootrom.h"
-#include "pico/stdio.h"
-#include "hardware/watchdog.h"
-#include "hardware/gpio.h"
-#include "hardware/adc.h"
-#include "hardware/i2c.h"
 
-#include "mpr121.h"
+#include "hardware/gpio.h"
+#include "hardware/sync.h"
+#include "hardware/structs/ioqspi.h"
+#include "hardware/structs/sio.h"
+
 #include "tusb.h"
 #include "usb_descriptors.h"
 
-/* Measure the time of a function call */
-#define RUN_TIME(func) \
-   { uint64_t _t = time_us_64(); func; \
-     printf(#func ":%lld\n", time_us_64() - _t); }
+#include "board_defs.h"
 
-struct {
-    uint16_t buttons;
-    uint8_t joy[6];
-} hid_report;
+#include "save.h"
+#include "config.h"
+#include "cmd.h"
+
+#include "touch.h"
+#include "rgb.h"
+
+struct __attribute__((packed)) {
+    uint16_t buttons; // 16 buttons; see JoystickButtons_t for bit mapping
+    uint8_t  HAT;    // HAT switch; one nibble w/ unused nibble
+    uint32_t axis;  // slider touch data
+    uint8_t  VendorSpec;
+} hid_joy;
+
+struct __attribute__((packed)) {
+    uint8_t modifier;
+    uint8_t keymap[15];
+} hid_nkro, sent_hid_nkro;
 
 void report_usb_hid()
 {
     if (tud_hid_ready()) {
-        hid_report.joy[2] = 0;
-        hid_report.joy[3] = 64;
-        hid_report.joy[4] = 128;
-        hid_report.joy[5] = 192;
-        tud_hid_n_report(0x00, REPORT_ID_JOYSTICK, &hid_report, sizeof(hid_report));
+        hid_joy.HAT = 0;
+        hid_joy.VendorSpec = 0;
+        if (mai_cfg->hid.joy) {
+            tud_hid_n_report(0x00, REPORT_ID_JOYSTICK, &hid_joy, sizeof(hid_joy));
+        }
+        if (mai_cfg->hid.nkro &&
+            (memcmp(&hid_nkro, &sent_hid_nkro, sizeof(hid_nkro)) != 0)) {
+            sent_hid_nkro = hid_nkro;
+            tud_hid_n_report(0x02, 0, &sent_hid_nkro, sizeof(sent_hid_nkro));
+        }
     }
 }
 
-static bool request_core1_pause = false;
-
-static void pause_core1(bool pause)
+static void gen_joy_report()
 {
-    request_core1_pause = pause;
-    if (pause) {
-        sleep_ms(5); /* wait for any IO ops to finish */
+    hid_joy.axis = 0;
+    for (int i = 0; i < 16; i++) {
+        if (touch_touched(i * 2)) {
+            hid_joy.axis |= 1 << (30 - i * 2);
+        }
+        if (touch_touched(i * 2 + 1)) {
+            hid_joy.axis |= 1 << (31 - i * 2);
+        }
+
+    }
+    hid_joy.axis ^= 0x80808080; // some magic number from CrazyRedMachine
+    hid_joy.buttons = 0x0;
+}
+
+const uint8_t keycode_table[128][2] = { HID_ASCII_TO_KEYCODE };
+const char keymap[38 + 1] = NKRO_KEYMAP; // 32 keys, 6 air keys, 1 terminator
+static void gen_nkro_report()
+{
+    for (int i = 0; i < 32; i++) {
+        uint8_t code = keycode_table[keymap[i]][1];
+        uint8_t byte = code / 8;
+        uint8_t bit = code % 8;
+        if (touch_touched(i)) {
+            hid_nkro.keymap[byte] |= (1 << bit);
+        } else {
+            hid_nkro.keymap[byte] &= ~(1 << bit);
+        }
+    }
+    for (int i = 0; i < 6; i++) {
+        uint8_t code = keycode_table[keymap[32 + i]][1];
+        uint8_t byte = code / 8;
+        uint8_t bit = code % 8;
+        if (hid_joy.buttons & (1 << i)) {
+            hid_nkro.keymap[byte] |= (1 << bit);
+        } else {
+            hid_nkro.keymap[byte] &= ~(1 << bit);
+        }
     }
 }
 
+static uint64_t last_hid_time = 0;
+
+static void run_lights()
+{
+    uint64_t now = time_us_64();
+    if (now - last_hid_time < 1000000) {
+        return;
+    }
+
+    const uint32_t colors[] = {0x000000, 0x0000ff, 0xff0000, 0xffff00,
+                               0x00ff00, 0x00ffff, 0xffffff};
+
+    for (int i = 0; i < 15; i++) {
+        int x = 15 - i;
+        uint8_t r = (x & 0x01) ? 10 : 0;
+        uint8_t g = (x & 0x02) ? 10 : 0;
+        uint8_t b = (x & 0x04) ? 10 : 0;
+        rgb_gap_color(i, rgb32(r, g, b, false));
+    }
+
+    for (int i = 0; i < 16; i++) {
+        bool r = touch_touched(i * 2);
+        bool g = touch_touched(i * 2 + 1);
+        rgb_set_color(30 - i * 2, rgb32(r ? 80 : 0, g ? 80 : 0, 0, false));
+    }
+}
+
+static mutex_t core1_io_lock;
 static void core1_loop()
 {
-}
-
-
-// I2C definitions: port and pin numbers
-#define MPR121_PORT i2c0
-#define MPR121_SDA 16
-#define MPR121_SCL 17
-
-// MPR121 I2C definitions: address and frequency.
-#define MPR121_ADDR 0x5A
-#define MPR121_I2C_FREQ 400000
-
-// Touch and release thresholds.
-#define MPR121_TOUCH_THRESHOLD 16
-#define MPR121_RELEASE_THRESHOLD 10
-
-#define GP2Y_PORT i2c0
-#define GP2Y_I2C_FREQ 200000
-#define GP2Y_SDA 16
-#define GP2Y_SCL 17
-
-static void core0_loop_gp2y()
-{
-    i2c_init(GP2Y_PORT, GP2Y_I2C_FREQ);
-    gpio_set_function(GP2Y_SDA, GPIO_FUNC_I2C);
-    gpio_set_function(GP2Y_SCL, GPIO_FUNC_I2C);
-    gpio_pull_up(GP2Y_SDA);
-    gpio_pull_up(GP2Y_SCL);
-
-    while(1) {
-        tud_task();
-
-        hid_report.buttons = 0xcccc;
-        report_usb_hid();
-
-        uint8_t reg = 0x00;
-        i2c_write_blocking(GP2Y_PORT, 0x40, &reg, 1, true);
-
-        uint16_t v = 0x00;
-        i2c_read_blocking(GP2Y_PORT, 0x5e, (uint8_t *)&v, 2, false);
-   
-        printf("%4x\n", v);
-
-        sleep_ms(1);
-    }
-}
-
-
-static void core0_loop_adc()
-{
-    adc_init();
-    adc_gpio_init(28);
-    adc_select_input(2);
-
-    while(1) {
-        tud_task();
-
-        hid_report.buttons = 0xcccc;
-        report_usb_hid();
-
-        uint16_t result = adc_read();
-        printf("%6o\n", result);
-        sleep_ms(1);
-    }
-}
-
-static void core0_loop_mpr121()
-{
-    // Initialise I2C.
-    i2c_init(MPR121_PORT, MPR121_I2C_FREQ);
-    gpio_set_function(MPR121_SDA, GPIO_FUNC_I2C);
-    gpio_set_function(MPR121_SCL, GPIO_FUNC_I2C);
-    gpio_pull_up(MPR121_SDA);
-    gpio_pull_up(MPR121_SCL);
-
-    struct mpr121_sensor mpr121[3];
-    for (int m = 0; m < 3; m++)
-    {
-        mpr121_init(MPR121_PORT, MPR121_ADDR + m, mpr121 + m);
-        mpr121_set_thresholds(MPR121_TOUCH_THRESHOLD,
-                            MPR121_RELEASE_THRESHOLD, mpr121 + m);
-        // Enable only one touch sensor (electrode 0).
-        mpr121_enable_electrodes(12, mpr121 + m);
-    }
-
-    int16_t baseline[34] = {0};
-
-    uint32_t counter[34] = {0};
-    for (int c = 0; c < 1000; c++) {
-        tud_task();
-        hid_report.buttons = 0xcccc;
-        report_usb_hid();
-        for (int i = 0; i < 34; i++) {
-            int16_t touch_data;
-            mpr121_baseline_value(i % 12, &touch_data, mpr121 + i / 12);
-            counter[i] += touch_data;
+    while (1) {
+        if (mutex_try_enter(&core1_io_lock, NULL)) {
+            run_lights();
+            rgb_update();
+            mutex_exit(&core1_io_lock);
         }
-    }
-
-    for (int i = 0; i < 34; i++) {
-        baseline[i] = counter[i] / 1000;
-    }
-
-    while(1) {
-        tud_task();
-
-        hid_report.buttons = 0xcccc;
-        report_usb_hid();
-
-        for (int i = 0; i < 34; i++) {
-            int16_t touch_data;
-            mpr121_baseline_value(i % 12, &touch_data, mpr121 + i / 12);
-            int16_t display_data = (baseline[i] - touch_data) / 4;
-            if (display_data) {
-                printf("%2d", display_data);
-            } else {
-                printf("  ");
-            }
-            printf("%c", i % 12 == 11 ? ':' : ' ');
-        }
-        printf("\n");
+        fps_count(1);
+        sleep_ms(1);
     }
 }
 
 static void core0_loop()
 {
-    core0_loop_mpr121();
+    while(1) {
+        cmd_run();
+        save_loop();
+        fps_count(0);
+
+        touch_update();
+
+        gen_joy_report();
+        gen_nkro_report();
+        report_usb_hid();
+        tud_task();
+    }
 }
 
 void init()
 {
+    sleep_ms(100);
+    set_sys_clock_khz(150000, true);
     board_init();
     tusb_init();
-
     stdio_init_all();
 
+    config_init();
+    mutex_init(&core1_io_lock);
+    save_init(0xca34cafe, &core1_io_lock);
+
+    touch_init();
+    rgb_init();
+
+    cmd_init();
 }
 
 int main(void)
 {
-    sleep_ms(1000);
-
     init();
-    //multicore_launch_core1(core1_loop);
-
+    multicore_launch_core1(core1_loop);
     core0_loop();
-
     return 0;
 }
 
@@ -209,6 +190,7 @@ uint16_t tud_hid_get_report_cb(uint8_t itf, uint8_t report_id,
                                hid_report_type_t report_type, uint8_t *buffer,
                                uint16_t reqlen)
 {
+    printf("Get from USB %d-%d\n", report_id, report_type);
     return 0;
 }
 
@@ -218,10 +200,22 @@ void tud_hid_set_report_cb(uint8_t itf, uint8_t report_id,
                            hid_report_type_t report_type, uint8_t const *buffer,
                            uint16_t bufsize)
 {
-    if ((report_id == REPORT_ID_LIGHTS) &&
-        (report_type == HID_REPORT_TYPE_OUTPUT)) {
-        if (bufsize >= 0) {
-            return;
+    if (report_type == HID_REPORT_TYPE_OUTPUT) {
+        if (report_id == REPORT_ID_LED_touch_16) {
+            rgb_set_brg(0, buffer, bufsize / 3);
+        } else if (report_id == REPORT_ID_LED_touch_15) {
+            rgb_set_brg(16, buffer, bufsize / 3);
+        } else if (report_id == REPORT_ID_LED_TOWER_6) {
+            rgb_set_brg(31, buffer, bufsize / 3);
         }
+        last_hid_time = time_us_64();
+        return;
+    } 
+    
+    if (report_type == HID_REPORT_TYPE_FEATURE) {
+        if (report_id == REPORT_ID_LED_COMPRESSED) {
+        }
+        last_hid_time = time_us_64();
+        return;
     }
 }

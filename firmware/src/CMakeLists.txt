@@ -4,8 +4,8 @@ set(LWIP_ROOT ${PICO_SDK_PATH}/lib/lwip)
 function(make_firmware board board_def)
     pico_sdk_init()
     add_executable(${board}
-                   main.c buttons.c rgb.c save.c config.c setup.c
-                   usb_descriptors.c)
+        main.c touch.c rgb.c save.c config.c cmd.c
+        mpr121.c usb_descriptors.c)
     target_compile_definitions(${board} PUBLIC ${board_def})
     pico_enable_stdio_usb(${board} 1)
     pico_enable_stdio_uart(${board} 0)
@@ -21,13 +21,13 @@ function(make_firmware board board_def)
     target_link_libraries(${board} PRIVATE
         pico_multicore pico_stdlib hardware_pio hardware_pwm hardware_flash
         hardware_adc hardware_i2c hardware_watchdog
-        tinyusb_device tinyusb_board pico-mpr121)
+        tinyusb_device tinyusb_board)
 
     pico_add_extra_outputs(${board})
 
     add_custom_command(TARGET ${board} POST_BUILD
-                       COMMAND cp ${board}.uf2 /mnt/d/Code/iidx_pico/firmware/build)
+                       COMMAND cp ${board}.uf2 ${CMAKE_CURRENT_LIST_DIR}/..)
 endfunction()
 
-make_firmware(mai_pico BOARD_IIDX_PICO)
+make_firmware(mai_pico BOARD_MAI_PICO)
 

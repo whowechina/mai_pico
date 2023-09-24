@@ -9,4 +9,3 @@ set(CMAKE_C_STANDARD 11)
 pico_sdk_init()
 
 add_subdirectory(src)
-add_subdirectory(lib/pico-mpr121 mpr121)

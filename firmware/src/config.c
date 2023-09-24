@@ -1,68 +1,63 @@
 /*
- * Controller Config Data
+ * Controller Config and Runtime Data
  * WHowe <github.com/whowechina>
  * 
  * Config is a global data structure that stores all the configuration
+ * Runtime is something to share between files.
  */
 
 #include "config.h"
 #include "save.h"
 
-iidx_cfg_t *iidx_cfg;
+mai_cfg_t *mai_cfg;
 
-static iidx_cfg_t default_cfg = {
-    .key_off = { {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}},
-    .key_on = { {40,40,40}, {40,40,40}, {40,40,40}, {40,40,40}, {40,40,40}, {40,40,40},
-                {40,40,40}, {40,40,40}, {40,40,40}, {40,40,40}, {40,40,40},
+static mai_cfg_t default_cfg = {
+    .colors = {
+        .key_on = 0x00FF00,
+        .key_off = 0x000000,
     },
-    .tt_led = {
-        .start = 0,
-        .num = 24,
-        .effect = 0,
-        .param = 0,
-        .mode = 0,
+    .style = {
+        .key = 0,
+        .level = 7,
     },
-    .tt_sensor = {
-        .mode = 2,
-        .deadzone = 1,
-        .ppr = 1,
+    .sense = {
+        .filter = 0x11,
+        .debounce_touch = 1,
+        .debounce_release = 2,
+     },
+    .hid = {
+        .joy = 1,
+        .nkro = 0,
     },
-    .effects = {
-        .e1 = 255,
-        .e2 = 128,
-        .e3 = 128,
-        .e4 = 128,
-    },
-    .level = 128,
-    .konami = false,
 };
+
+mai_runtime_t *mai_runtime;
 
 static void config_loaded()
 {
-    if (iidx_cfg->tt_led.num == 0) {
-        iidx_cfg->tt_led.num = 24;
+    if (mai_cfg->style.level > 10) {
+        mai_cfg->style.level = default_cfg.style.level;
         config_changed();
     }
-    if ((iidx_cfg->tt_led.start > 8) ||
-        (iidx_cfg->tt_led.start + iidx_cfg->tt_led.num > 128)) {
-        iidx_cfg->tt_led.start = 0;
-        iidx_cfg->tt_led.num = 24;
+    if ((mai_cfg->sense.filter & 0x0f) > 3 ||
+        ((mai_cfg->sense.filter >> 4) & 0x0f) > 3) {
+        mai_cfg->sense.filter = default_cfg.sense.filter;
         config_changed();
     }
-    if (iidx_cfg->tt_sensor.deadzone > 2) {
-        iidx_cfg->tt_sensor.deadzone = 0;
+    if ((mai_cfg->sense.global > 9) || (mai_cfg->sense.global < -9)) {
+        mai_cfg->sense.global = default_cfg.sense.global;
         config_changed();
     }
-    if (iidx_cfg->tt_led.mode > 2) {
-        iidx_cfg->tt_led.mode = 0;
-        config_changed();
+    for (int i = 0; i < 32; i++) {
+        if ((mai_cfg->sense.keys[i] > 9) || (mai_cfg->sense.keys[i] < -9)) {
+            mai_cfg->sense.keys[i] = default_cfg.sense.keys[i];
+            config_changed();
+        }
     }
-    if (iidx_cfg->tt_sensor.mode > 3) {
-        iidx_cfg->tt_sensor.mode = 2;
-        config_changed();
-    }
-    if (iidx_cfg->tt_sensor.ppr > 3) {
-        iidx_cfg->tt_sensor.ppr = 1;
+    if ((mai_cfg->sense.debounce_touch > 7) |
+        (mai_cfg->sense.debounce_release > 7)) {
+        mai_cfg->sense.debounce_touch = default_cfg.sense.debounce_touch;
+        mai_cfg->sense.debounce_release = default_cfg.sense.debounce_release;
         config_changed();
     }
 }
@@ -74,11 +69,11 @@ void config_changed()
 
 void config_factory_reset()
 {
-    *iidx_cfg = default_cfg;
+    *mai_cfg = default_cfg;
     save_request(true);
 }
 
 void config_init()
 {
-    iidx_cfg = (iidx_cfg_t *)save_alloc(sizeof(iidx_cfg), &default_cfg, config_loaded);
+    mai_cfg = (mai_cfg_t *)save_alloc(sizeof(*mai_cfg), &default_cfg, config_loaded);
 }

@@ -9,38 +9,34 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef struct __attribute ((packed)) {
-    uint8_t h; // hue;
-    uint8_t s; // saturation;
-    uint8_t v; // value;
-} hsv_t;
+typedef struct __attribute__((packed)) {
+    struct {
+        uint32_t key_on;
+        uint32_t key_off;
+    } colors;
+    struct {
+        uint8_t key;
+        uint8_t level;
+    } style;
+    struct {
+        int8_t filter;
+        int8_t global;
+        uint8_t debounce_touch;
+        uint8_t debounce_release;
+        int8_t keys[34];
+    } sense;
+    struct {
+        uint8_t joy : 4;
+        uint8_t nkro : 4;
+    } hid;
+} mai_cfg_t;
 
-typedef struct __attribute ((packed)) {
-    hsv_t key_off[11];
-    hsv_t key_on[11];
-    struct {
-        uint8_t start;
-        uint8_t num;
-        uint8_t effect;
-        uint8_t param;
-        uint8_t mode; /* 0: on, 1: reversed, 2: off */
-    } tt_led;
-    struct {
-        uint8_t mode; /* 0: analog, 1: analog reversed, 2: i2c, 3: i2c reversed */
-        uint8_t deadzone; /* only for analog */
-        uint8_t ppr; /* 0: 256, 1: 128, 2: 96, 3: 64, other: 256 */
-    } tt_sensor;
-    struct {
-        uint8_t e1;
-        uint8_t e2;
-        uint8_t e3;
-        uint8_t e4;
-    } effects;
-    uint8_t level; /* led brightness limit */
-    bool konami; /* konami spoof */
-} iidx_cfg_t;
+typedef struct {
+    uint16_t fps[2];
+} mai_runtime_t;
 
-extern iidx_cfg_t *iidx_cfg;
+extern mai_cfg_t *mai_cfg;
+extern mai_runtime_t *mai_runtime;
 
 void config_init();
 void config_changed(); // Notify the config has changed

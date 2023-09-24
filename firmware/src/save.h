@@ -7,11 +7,14 @@
 #define SAVE_H
 
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdbool.h>
+
+#include "pico/multicore.h"
 
 /* It's safer to lock other I/O ops during saving, so we need a locker */
 typedef void (*io_locker_func)(bool pause);
-void save_init(io_locker_func locker);
+void save_init(uint32_t magic, mutex_t *lock);
 
 void save_loop();
 
