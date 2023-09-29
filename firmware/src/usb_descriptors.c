@@ -75,20 +75,20 @@ uint8_t const* tud_descriptor_device_cb(void) {
 //--------------------------------------------------------------------+
 
 uint8_t const desc_hid_report_joy[] = {
-    MAIPICO_REPORT_DESC_JOYSTICK,
+    CHUPICO_REPORT_DESC_JOYSTICK,
 };
 
 uint8_t const desc_hid_report_led[] = {
-    MAIPICO_LED_HEADER,
-    MAIPICO_REPORT_DESC_LED_touch_16,
-    MAIPICO_REPORT_DESC_LED_touch_15,
-    MAIPICO_REPORT_DESC_LED_TOWER_6,
-    MAIPICO_REPORT_DESC_LED_COMPRESSED,
-    MAIPICO_LED_FOOTER
+    CHUPICO_LED_HEADER,
+    CHUPICO_REPORT_DESC_LED_TOUCH_16,
+    CHUPICO_REPORT_DESC_LED_TOUCH_15,
+    CHUPICO_REPORT_DESC_LED_TOWER_6,
+    CHUPICO_REPORT_DESC_LED_COMPRESSED,
+    CHUPICO_LED_FOOTER
 };
 
 uint8_t const desc_hid_report_nkro[] = {
-    MAIPICO_REPORT_DESC_NKRO,
+    CHUPICO_REPORT_DESC_NKRO,
 };
 
 // Invoked when received GET HID REPORT DESCRIPTOR
@@ -111,9 +111,13 @@ uint8_t const* tud_hid_descriptor_report_cb(uint8_t itf)
 // Configuration Descriptor
 //--------------------------------------------------------------------+
 
-enum { ITF_NUM_JOY, ITF_NUM_LED, ITF_NUM_NKRO, ITF_NUM_CDC, ITF_NUM_CDC_DATA, ITF_NUM_TOTAL };
+enum { ITF_NUM_JOY, ITF_NUM_LED, ITF_NUM_NKRO,
+       ITF_NUM_CDC, ITF_NUM_CDC_DATA,
+       ITF_NUM_CDC_TOUCH, ITF_NUM_CDC_DATA_TOUCH,
+       ITF_NUM_CDC_LED, ITF_NUM_CDC_DATA_LED,
+       ITF_NUM_TOTAL };
 
-#define CONFIG_TOTAL_LEN (TUD_CONFIG_DESC_LEN + TUD_HID_DESC_LEN * 3 + TUD_CDC_DESC_LEN)
+#define CONFIG_TOTAL_LEN (TUD_CONFIG_DESC_LEN + TUD_HID_DESC_LEN * 3 + TUD_CDC_DESC_LEN * 3)
 
 #define EPNUM_JOY 0x84
 #define EPNUM_LED 0x85
@@ -121,6 +125,12 @@ enum { ITF_NUM_JOY, ITF_NUM_LED, ITF_NUM_NKRO, ITF_NUM_CDC, ITF_NUM_CDC_DATA, IT
 #define EPNUM_CDC_NOTIF 0x81
 #define EPNUM_CDC_OUT   0x02
 #define EPNUM_CDC_IN    0x82
+#define EPNUM_CDC_TOUCH_NOTIF 0x87
+#define EPNUM_CDC_TOUCH_OUT   0x03
+#define EPNUM_CDC_TOUCH_IN    0x88
+#define EPNUM_CDC_LED_NOTIF 0x89
+#define EPNUM_CDC_LED_OUT   0x04
+#define EPNUM_CDC_LED_IN    0x8a
 
 uint8_t const desc_configuration_joy[] = {
     // Config number, interface count, string index, total length, attribute,
@@ -143,7 +153,13 @@ uint8_t const desc_configuration_joy[] = {
                        CFG_TUD_HID_EP_BUFSIZE, 1),
 
     TUD_CDC_DESCRIPTOR(ITF_NUM_CDC, 7, EPNUM_CDC_NOTIF,
-                       8, EPNUM_CDC_OUT, EPNUM_CDC_IN, 64)
+                       8, EPNUM_CDC_OUT, EPNUM_CDC_IN, 64),
+
+    TUD_CDC_DESCRIPTOR(ITF_NUM_CDC_TOUCH, 8, EPNUM_CDC_TOUCH_NOTIF,
+                       8, EPNUM_CDC_TOUCH_OUT, EPNUM_CDC_TOUCH_IN, 64),
+
+    TUD_CDC_DESCRIPTOR(ITF_NUM_CDC_LED, 9, EPNUM_CDC_LED_NOTIF,
+                       8, EPNUM_CDC_LED_OUT, EPNUM_CDC_LED_IN, 64)
 };
 
 // Invoked when received GET CONFIGURATION DESCRIPTOR
@@ -167,6 +183,8 @@ const char *string_desc_arr[] = {
     "Mai Pico LED",
     "Mai Pico NKRO",
     "Mai Pico Serial Port",
+    "Mai Pico Touch Serial Port",
+    "Mai Pico LED Serial Port",
 };
 
 // Invoked when received GET STRING DESCRIPTOR request

@@ -23,11 +23,12 @@
 
 #include "board_defs.h"
 
+#include "touch.h"
 #include "save.h"
 #include "config.h"
-#include "cmd.h"
+#include "cli.h"
+#include "commands.h"
 
-#include "touch.h"
 #include "rgb.h"
 
 struct __attribute__((packed)) {
@@ -71,7 +72,6 @@ static void gen_joy_report()
 
     }
     hid_joy.axis ^= 0x80808080; // some magic number from CrazyRedMachine
-    hid_joy.buttons = 0x0;
 }
 
 const uint8_t keycode_table[128][2] = { HID_ASCII_TO_KEYCODE };
@@ -109,21 +109,68 @@ static void run_lights()
         return;
     }
 
-    const uint32_t colors[] = {0x000000, 0x0000ff, 0xff0000, 0xffff00,
-                               0x00ff00, 0x00ffff, 0xffffff};
+    uint32_t colors[5] = { 0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xffffff };
 
-    for (int i = 0; i < 15; i++) {
-        int x = 15 - i;
-        uint8_t r = (x & 0x01) ? 10 : 0;
-        uint8_t g = (x & 0x02) ? 10 : 0;
-        uint8_t b = (x & 0x04) ? 10 : 0;
-        rgb_gap_color(i, rgb32(r, g, b, false));
+    for (int i = 0; i < 8; i++) {
+        rgb_set_color(i, 0);
     }
+    for (int i = 0; i < 34; i++) {
+        if (touch_touched(i)) {
+            if (i < 32) {
+                rgb_set_color((i + 16) / 4 % 8, colors[i % 4]);
+            } else {
+                rgb_set_color(i - 32, colors[4]);
+            }
+        }
+    }
+//    for (int i = 0; i < 15; i++) {
+//        uint32_t color = rgb32_from_hsv(i * 255 / 8, 255, 16);
+//        rgb_set_color(i, color);
+//    }
 
-    for (int i = 0; i < 16; i++) {
-        bool r = touch_touched(i * 2);
-        bool g = touch_touched(i * 2 + 1);
-        rgb_set_color(30 - i * 2, rgb32(r ? 80 : 0, g ? 80 : 0, 0, false));
+    for (int i = 0; i < 34; i++) {
+//        bool r = touch_touched(i * 2);
+//        bool g = touch_touched(i * 2 + 1);
+//        rgb_set_color(30 - i * 2, rgb32(r ? 80 : 0, g ? 80 : 0, 0, false));
+    }
+}
+
+
+static void echo_serial_port(uint8_t itf, uint8_t buf[], uint32_t count)
+{
+    //tud_cdc_n_write_char(itf, buf[i]);
+    //tud_cdc_n_write_flush(itf);
+}
+
+static void cdc_task(void)
+{
+    uint8_t itf;
+
+    for (itf = 1; itf < CFG_TUD_CDC; itf++)
+    {
+        // connected() check for DTR bit
+        // Most but not all terminal client set this when making connection
+        // if ( tud_cdc_n_connected(itf) )
+        if ( tud_cdc_n_available(itf) )
+        {
+            uint8_t buf[64];
+
+            uint32_t count = tud_cdc_n_read(itf, buf, sizeof(buf));
+
+            if (itf == 1) {
+                printf("1 TXT:", itf);
+                for (int i = 0; i < count; i++) {
+                    printf("%c", buf[i]);
+                }
+                printf("\n");
+            } else if (itf == 2) {
+                printf("2 HEX:", itf);
+                for (int i = 0; i < count; i++) {
+                    printf(" %02x", buf[i]);
+                }
+                printf("\n");
+            }
+        }
     }
 }
 
@@ -136,7 +183,7 @@ static void core1_loop()
             rgb_update();
             mutex_exit(&core1_io_lock);
         }
-        fps_count(1);
+        cli_fps_count(1);
         sleep_ms(1);
     }
 }
@@ -144,22 +191,24 @@ static void core1_loop()
 static void core0_loop()
 {
     while(1) {
-        cmd_run();
+        tud_task();
+        cdc_task();
+
+        cli_run();
         save_loop();
-        fps_count(0);
+        cli_fps_count(0);
 
         touch_update();
 
         gen_joy_report();
         gen_nkro_report();
         report_usb_hid();
-        tud_task();
     }
 }
 
 void init()
 {
-    sleep_ms(100);
+    sleep_ms(50);
     set_sys_clock_khz(150000, true);
     board_init();
     tusb_init();
@@ -172,7 +221,9 @@ void init()
     touch_init();
     rgb_init();
 
-    cmd_init();
+    cli_init("mai_pico>", "\n   << Mai Pico Controller >>\n"
+                            " https://github.com/whowechina\n\n");
+    commands_init();
 }
 
 int main(void)
@@ -201,13 +252,6 @@ void tud_hid_set_report_cb(uint8_t itf, uint8_t report_id,
                            uint16_t bufsize)
 {
     if (report_type == HID_REPORT_TYPE_OUTPUT) {
-        if (report_id == REPORT_ID_LED_touch_16) {
-            rgb_set_brg(0, buffer, bufsize / 3);
-        } else if (report_id == REPORT_ID_LED_touch_15) {
-            rgb_set_brg(16, buffer, bufsize / 3);
-        } else if (report_id == REPORT_ID_LED_TOWER_6) {
-            rgb_set_brg(31, buffer, bufsize / 3);
-        }
         last_hid_time = time_us_64();
         return;
     } 

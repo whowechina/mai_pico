@@ -12,8 +12,8 @@
 
 #define IO_TIMEOUT_US 1000
 
-#define TOUCH_THRESHOLD_BASE 17
-#define RELEASE_THRESHOLD_BASE 12
+#define TOUCH_THRESHOLD_BASE 22
+#define RELEASE_THRESHOLD_BASE 15
 
 #define MPR121_TOUCH_STATUS_REG 0x00
 #define MPR121_OUT_OF_RANGE_STATUS_0_REG 0x02
@@ -121,10 +121,14 @@ void mpr121_init(uint8_t i2c_addr)
     // if only use 0.5uS CDT, the TGL for proximity cannot meet 
     // Possible if manually set Register0x72=0x03 
     // (Auto configure result) alone. 
-    write_reg(i2c_addr, 0x7D, 0xc8); // AC up limit /C8/BD/C0/9C 
-    write_reg(i2c_addr, 0x7E, 0x82); // AC low limit /82/7A/7C/65 
-    write_reg(i2c_addr, 0x7F, 0xb4); // AC target /B4/AA/AC/8C target for /3.0V/2.8V/1.8V 
-    write_reg(i2c_addr, 0x5E, 0x8C); // Run 12 touch, CL=2b10, load 5MSB to baseline 
+
+    // I want to max out sensitivity, I don't care linearity
+    const uint8_t usl = (3.3 - 0.1) / 3.3 * 256;
+    write_reg(i2c_addr, 0x7D, usl),  
+    write_reg(i2c_addr, 0x7E, usl * 0.65),
+    write_reg(i2c_addr, 0x7F, usl * 0.9);
+
+    write_reg(i2c_addr, 0x5E, 0x8C); // Run 12 touch, load 5MSB to baseline 
 }
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
@@ -153,6 +157,11 @@ uint16_t mpr121_touched(uint8_t addr)
     return touched;
 }
 
+void mpr121_raw(uint8_t addr, uint16_t *raw, int num)
+{
+    mpr121_read_many16(addr, MPR121_ELECTRODE_FILTERED_DATA_REG, raw, num);
+}
+
 static uint8_t mpr121_stop(uint8_t addr)
 {
     uint8_t ecr = read_reg(addr, MPR121_ELECTRODE_CONFIG_REG);
@@ -165,7 +174,7 @@ static uint8_t mpr121_resume(uint8_t addr, uint8_t ecr)
     write_reg(addr, MPR121_ELECTRODE_CONFIG_REG, ecr);
 }
 
-void mpr121_filter(uint8_t addr, uint8_t ffi, uint8_t sfi)
+void mpr121_filter(uint8_t addr, uint8_t ffi, uint8_t sfi, uint8_t esi)
 {
     uint8_t ecr = mpr121_stop(addr);
 
@@ -174,7 +183,8 @@ void mpr121_filter(uint8_t addr, uint8_t ffi, uint8_t sfi)
     uint8_t acc = read_reg(addr, MPR121_AUTOCONFIG_CONTROL_0_REG);
     write_reg(addr, MPR121_AUTOCONFIG_CONTROL_0_REG, (acc & 0x3f) | ffi << 6);
     uint8_t fcr = read_reg(addr, MPR121_FILTER_CONFIG_REG);
-    write_reg(addr, MPR121_FILTER_CONFIG_REG, (fcr & 0xe7) | (sfi & 3) << 3);
+    write_reg(addr, MPR121_FILTER_CONFIG_REG,
+              (fcr & 0xe0) | ((sfi & 3) << 3) | esi);
 
     mpr121_resume(addr, ecr);
 }
