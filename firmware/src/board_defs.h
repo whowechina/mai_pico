@@ -12,8 +12,14 @@
 
 #define RGB_PIN 13
 #define RGB_ORDER GRB // or RGB
+#define RGB_BUTTON_MAP { 5, 4, 3, 2, 1, 0, 7, 6 }
 
-#define NKRO_KEYMAP "1aqz2swx3dec4frv5gtb6hyn7jum8ki90olp,."
+#define BUTTON_DEF { 1, 0, 4, 5, 8, 9, 3, 2 }
+#define BUTTON_NKRO_MAP "WEDCXZAQ"
+
+#define TOUCH_MAP { E3, A2, B2, D2, E2, A1, B1, D1, E1, C2, A8, B8, \
+                    D8, E8, A7, B7, D7, E7, A6, B6, D6, E6, A5, B5, \
+                    D5, E5, C1, A4, B4, D4, E4, A3, B3, D3 }
 #else
 
 #endif

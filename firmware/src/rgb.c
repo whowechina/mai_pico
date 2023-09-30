@@ -23,6 +23,7 @@
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
 static uint32_t rgb_buf[20];
+static const uint8_t button_led_map[] = RGB_BUTTON_MAP;
 
 #define _MAP_LED(x) _MAKE_MAPPER(x)
 #define _MAKE_MAPPER(x) MAP_LED_##x
@@ -121,28 +122,20 @@ static inline uint32_t apply_level(uint32_t color)
     return r << 16 | g << 8 | b;
 }
 
-void rgb_set_color(unsigned index, uint32_t color)
+void rgb_set_button_color(unsigned index, uint32_t color)
 {
-    if (index >= ARRAY_SIZE(rgb_buf)) {
+    if (index >= 8) {
         return;
     }
-    rgb_buf[index] = apply_level(color);
+    rgb_buf[button_led_map[index]] = apply_level(color);
 }
 
-void rgb_set_brg(unsigned index, const uint8_t *brg_array, size_t num)
+void rgb_set_cab_color(unsigned index, uint32_t color)
 {
-    if (index >= ARRAY_SIZE(rgb_buf)) {
+    if (index >= 0) {
         return;
     }
-    if (index + num > ARRAY_SIZE(rgb_buf)) {
-        num = ARRAY_SIZE(rgb_buf) - index;
-    }
-    for (int i = 0; i < num; i++) {
-        uint8_t b = brg_array[i * 3 + 0];
-        uint8_t r = brg_array[i * 3 + 1];
-        uint8_t g = brg_array[i * 3 + 2];
-        rgb_buf[index + i] = apply_level(rgb32(r, g, b, false));
-    }
+    rgb_buf[8 + index] = apply_level(color);
 }
 
 void rgb_init()
