@@ -50,7 +50,11 @@ void report_usb_hid()
     if (tud_hid_ready()) {
         hid_joy.HAT = 0;
         hid_joy.VendorSpec = 0;
-       if (mai_cfg->hid.nkro &&
+        if (mai_cfg->hid.joy) {
+            hid_joy.buttons = button_read();
+            tud_hid_n_report(0x00, REPORT_ID_JOYSTICK, &hid_joy, sizeof(hid_joy));
+        }
+        if (mai_cfg->hid.nkro &&
             (memcmp(&hid_nkro, &sent_hid_nkro, sizeof(hid_nkro)) != 0)) {
             sent_hid_nkro = hid_nkro;
             tud_hid_n_report(0x02, 0, &sent_hid_nkro, sizeof(sent_hid_nkro));
@@ -84,7 +88,7 @@ static void run_lights()
         return;
     }
 
-    if (now - io_last_io_time() < 5000000) {
+    if (now - io_last_io_time() < 60000000) {
         return;
     }
 
@@ -118,6 +122,8 @@ static void core1_loop()
 
 static void core0_loop()
 {
+    static uint64_t next_frame = 0;
+
     while(1) {
         tud_task();
         io_update();
@@ -125,6 +131,9 @@ static void core0_loop()
         cli_run();
         save_loop();
         cli_fps_count(0);
+
+        sleep_until(next_frame);
+        next_frame = time_us_64() + 1000; // 1KHz
 
         touch_update();
         button_update();

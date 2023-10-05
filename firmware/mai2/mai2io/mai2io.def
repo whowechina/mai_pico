@@ -1,0 +1,8 @@
+LIBRARY mai2io
+
+EXPORTS
+   mai2_io_get_api_version
+   mai2_io_init
+   mai2_io_poll
+   mai2_io_get_opbtns
+   mai2_io_get_gamebtns
