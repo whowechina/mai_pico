@@ -20,7 +20,7 @@ function(make_firmware board board_def)
     
     target_link_libraries(${board} PRIVATE
         pico_multicore pico_stdlib hardware_pio hardware_pwm hardware_flash
-        hardware_adc hardware_i2c hardware_watchdog
+        hardware_adc hardware_i2c hardware_watchdog pico_unique_id
         tinyusb_device tinyusb_board)
 
     pico_add_extra_outputs(${board})

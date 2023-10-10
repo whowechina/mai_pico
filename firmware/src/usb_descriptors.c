@@ -24,7 +24,7 @@
  */
 
 #include "usb_descriptors.h"
-
+#include "pico/unique_id.h"
 #include "tusb.h"
 
 /* A combination of interfaces must have a unique product id, since PC will save
@@ -173,12 +173,14 @@ uint8_t const* tud_descriptor_configuration_cb(uint8_t index) {
 // String Descriptors
 //--------------------------------------------------------------------+
 
+static char serial_number_str[24] = "123456\0";
+
 // array of pointer to string descriptors
-const char *string_desc_arr[] = {
+static const char *string_desc_arr[] = {
     (const char[]){0x09, 0x04},  // 0: is supported language is English (0x0409)
     "WHowe"       ,              // 1: Manufacturer
     "Mai Pico Controller",       // 2: Product
-    "123456",                    // 3: Serials, should use chip ID
+    serial_number_str,           // 3: Serials, use chip ID
     "Mai Pico Joystick",
     "Mai Pico LED",
     "Mai Pico NKRO",
@@ -198,6 +200,12 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid)
         memcpy(&_desc_str[1], string_desc_arr[0], 2);
         _desc_str[0] = (TUSB_DESC_STRING << 8) | (2 + 2);
         return _desc_str;
+    }
+    
+    if (index == 3) {
+        pico_unique_board_id_t board_id;
+        pico_get_unique_board_id(&board_id);
+        sprintf(serial_number_str, "%016llx", board_id);
     }
     
     const size_t base_num = sizeof(string_desc_arr) / sizeof(string_desc_arr[0]);
