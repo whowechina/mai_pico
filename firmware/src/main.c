@@ -84,11 +84,11 @@ static uint64_t last_hid_time = 0;
 static void run_lights()
 {
     uint64_t now = time_us_64();
-    if (now - last_hid_time < 1000000) {
+    if (last_hid_time != 0 && now - last_hid_time < 1000000) {
         return;
     }
 
-    if (now - io_last_io_time() < 60000000) {
+    if (io_last_io_time() != 0 && now - io_last_io_time() < 60000000) {
         return;
     }
 

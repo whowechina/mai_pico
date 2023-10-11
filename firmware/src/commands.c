@@ -7,6 +7,7 @@
 #include "pico/stdio.h"
 #include "pico/stdlib.h"
 
+#include "touch.h"
 #include "config.h"
 #include "save.h"
 #include "cli.h"

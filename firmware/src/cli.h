@@ -9,7 +9,7 @@
 
 typedef void (*cmd_handler_t)(int argc, char *argv[]);
 
-void cli_init();
+void cli_init(const char *prompt, const char *logo);
 void cli_register(const char *cmd, cmd_handler_t handler, const char *help);
 void cli_run();
 void cli_fps_count(int core);
