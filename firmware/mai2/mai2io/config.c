@@ -28,6 +28,7 @@ void mai2_io_config_load(
     cfg->vk_test = GetPrivateProfileIntW(L"io4", L"test", '1', filename);
     cfg->vk_service = GetPrivateProfileIntW(L"io4", L"service", '2', filename);
     cfg->vk_coin = GetPrivateProfileIntW(L"io4", L"coin", '3', filename);
+    cfg->swap_btn = GetPrivateProfileIntW(L"io4", L"swap", '4', filename);
 
     for (i = 0 ; i < 9 ; i++) {
         swprintf_s(key, _countof(key), L"1p_btn%i", i + 1);

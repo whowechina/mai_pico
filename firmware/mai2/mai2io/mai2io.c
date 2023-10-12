@@ -96,8 +96,8 @@ HANDLE hid_open_device(uint16_t vid, uint16_t pid, uint8_t mi, bool first)
 
 int hid_get_report(HANDLE handle, uint8_t *buf, uint8_t report_id, uint8_t nb_bytes)
 {
-    DWORD          bytesRead = 0;
-	static uint8_t tmp_buf[128];
+    DWORD bytesRead = 0;
+	uint8_t tmp_buf[128];
 	
 	if (buf == NULL) {
         return -1;
@@ -136,10 +136,10 @@ HRESULT mai2_io_init(void)
     mai2_io_config_load(&mai2_io_cfg, L".\\segatools.ini");
     logfile = fopen(".\\mai2_log.txt", "w+");
 
-    joy1_handle = hid_open_device(0x0f0d, 0x0092, -1, true);
+    joy1_handle = hid_open_device(0x0f0d, 0x0092, 0, true);
     fprintf(logfile, "Handle1: %Id\n", (intptr_t)joy1_handle);
     fflush(logfile);
-    joy2_handle = hid_open_device(0x0f0d, 0x0092, -1, false);
+    joy2_handle = hid_open_device(0x0f0d, 0x0092, 0, false);
     fprintf(logfile, "Handle2: %Id\n", (intptr_t)joy2_handle);
     fflush(logfile);
 
@@ -147,6 +147,7 @@ HRESULT mai2_io_init(void)
         fprintf(logfile, "Joy1 OK\n");
         HidD_SetNumInputBuffers(joy1_handle, 2);
     }
+
     if (joy2_handle != INVALID_HANDLE_VALUE) {
         fprintf(logfile, "Joy2 OK\n");
         HidD_SetNumInputBuffers(joy2_handle, 2);
@@ -174,8 +175,6 @@ HRESULT mai2_io_poll(void)
     mai2_player1_btn = 0;
     mai2_player2_btn = 0;
 
-    logfile = fopen(".\\mai2_log.txt", "a+");
-
     if (GetAsyncKeyState(mai2_io_cfg.vk_test) & 0x8000) {
         mai2_opbtn |= MAI2_IO_OPBTN_TEST;
     }
@@ -193,26 +192,23 @@ HRESULT mai2_io_poll(void)
         mai2_io_coin = false;
     }
 
-    fprintf(logfile, "OPT: %d\n", mai2_opbtn);
-    fflush(logfile);
-
     if (joy1_handle != INVALID_HANDLE_VALUE) {
         joy_report_t joy_data;
     	hid_get_report(joy1_handle, (uint8_t *)&joy_data, 0x01, sizeof(joy_data));
         mai2_player1_btn = joy_data.buttons;
-        fprintf(logfile, "Joy1: %d\n", mai2_player1_btn);
-        fflush(logfile);
     }
 
     if (joy2_handle != INVALID_HANDLE_VALUE) {
         joy_report_t joy_data;
         hid_get_report(joy2_handle, (uint8_t *)&joy_data, 0x01, sizeof(joy_data));
         mai2_player2_btn = joy_data.buttons;
-        fprintf(logfile, "Joy2: %d\n", mai2_player2_btn);
-        fflush(logfile);
     }
-    fprintf(logfile, "Joy Poll Done\n");
-    fclose(logfile);
+
+    if (mai2_io_cfg.swap_btn) {
+        uint16_t tmp = mai2_player1_btn;
+        mai2_player1_btn = mai2_player2_btn;
+        mai2_player2_btn = tmp;
+    }
     return S_OK;
 }
 
