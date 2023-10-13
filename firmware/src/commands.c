@@ -7,6 +7,8 @@
 #include "pico/stdio.h"
 #include "pico/stdlib.h"
 
+#include "tusb.h"
+
 #include "touch.h"
 #include "config.h"
 #include "save.h"
@@ -316,6 +318,15 @@ static void handle_raw()
     printf("\n");
 }
 
+static void handle_whoami()
+{
+    const char *msg[] = {"\nThis is Command Line port.\n", "\nThis is Touch port.\n", "\nThis is LED port.\n"};
+    for (int i = 0; i < 3; i++) {
+        tud_cdc_n_write(i, msg[i], strlen(msg[i]));
+        tud_cdc_n_write_flush(i);
+    }
+}
+
 static void handle_save()
 {
     save_request(true);
@@ -337,6 +348,7 @@ void commands_init()
     cli_register("sense", handle_sense, "Set sensitivity config.");
     cli_register("debounce", handle_debounce, "Set debounce config.");
     cli_register("raw", handle_raw, "Show key raw readings.");
+    cli_register("whoami", handle_whoami, "Identify each com port.");
     cli_register("save", handle_save, "Save config to flash.");
     cli_register("factory", config_factory_reset, "Reset everything to default.");
 }

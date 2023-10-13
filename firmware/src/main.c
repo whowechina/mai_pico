@@ -34,10 +34,7 @@
 #include "io.h"
 
 struct __attribute__((packed)) {
-    uint16_t buttons; // 16 buttons; see JoystickButtons_t for bit mapping
-    uint8_t  HAT;    // HAT switch; one nibble w/ unused nibble
-    uint32_t axis;  // slider touch data
-    uint8_t  VendorSpec;
+    uint16_t buttons;
 } hid_joy;
 
 struct __attribute__((packed)) {
@@ -48,16 +45,13 @@ struct __attribute__((packed)) {
 void report_usb_hid()
 {
     if (tud_hid_ready()) {
-        hid_joy.HAT = 0;
-        hid_joy.VendorSpec = 0;
         if (mai_cfg->hid.joy) {
             hid_joy.buttons = button_read();
-            tud_hid_n_report(0x00, REPORT_ID_JOYSTICK, &hid_joy, sizeof(hid_joy));
+            tud_hid_n_report(0, REPORT_ID_JOYSTICK, &hid_joy, sizeof(hid_joy));
         }
-        if (mai_cfg->hid.nkro &&
-            (memcmp(&hid_nkro, &sent_hid_nkro, sizeof(hid_nkro)) != 0)) {
+        if (mai_cfg->hid.nkro) {
             sent_hid_nkro = hid_nkro;
-            tud_hid_n_report(0x02, 0, &sent_hid_nkro, sizeof(sent_hid_nkro));
+            tud_hid_n_report(1, 0, &sent_hid_nkro, sizeof(sent_hid_nkro));
         }
     }
 }
@@ -189,15 +183,4 @@ void tud_hid_set_report_cb(uint8_t itf, uint8_t report_id,
                            hid_report_type_t report_type, uint8_t const *buffer,
                            uint16_t bufsize)
 {
-    if (report_type == HID_REPORT_TYPE_OUTPUT) {
-        last_hid_time = time_us_64();
-        return;
-    } 
-    
-    if (report_type == HID_REPORT_TYPE_FEATURE) {
-        if (report_id == REPORT_ID_LED_COMPRESSED) {
-        }
-        last_hid_time = time_us_64();
-        return;
-    }
 }

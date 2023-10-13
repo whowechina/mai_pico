@@ -27,21 +27,6 @@
 #include "pico/unique_id.h"
 #include "tusb.h"
 
-/* A combination of interfaces must have a unique product id, since PC will save
- * device driver after the first plug. Same VID/PID with different interface e.g
- * MSC (first), then CDC (later) will possibly cause system error on PC.
- *
- * Auto ProductID layout's Bitmap:
- *   [MSB]         HID | MSC | CDC          [LSB]
- */
-#define _PID_MAP(itf, n) ((CFG_TUD_##itf) << (n))
-#define USB_PID                                                      \
-    (0x4000 | _PID_MAP(CDC, 0) | _PID_MAP(MSC, 1) | _PID_MAP(HID, 2) | \
-     _PID_MAP(MIDI, 3) | _PID_MAP(VENDOR, 4))
-
-//--------------------------------------------------------------------+
-// Device Descriptors
-//--------------------------------------------------------------------+
 tusb_desc_device_t desc_device_joy = {
     .bLength = sizeof(tusb_desc_device_t),
     .bDescriptorType = TUSB_DESC_DEVICE,
@@ -51,18 +36,16 @@ tusb_desc_device_t desc_device_joy = {
     .bDeviceProtocol = 0x00,
     .bMaxPacketSize0 = CFG_TUD_ENDPOINT0_SIZE,
 
-// To match CrazyRedMachine dll
-// vid 0x0f0d, pid 0x0092, interface 1
-
-    .idVendor = 0x0f0d,
-    .idProduct = 0x0092,
+    .idVendor = 0x1f2d,
+    .idProduct = 0x0123,
     .bcdDevice = 0x0100,
 
     .iManufacturer = 0x01,
     .iProduct = 0x02,
     .iSerialNumber = 0x03,
 
-    .bNumConfigurations = 0x01};
+    .bNumConfigurations = 0x01
+};
 
 // Invoked when received GET DEVICE DESCRIPTOR
 // Application return pointer to descriptor
@@ -75,20 +58,11 @@ uint8_t const* tud_descriptor_device_cb(void) {
 //--------------------------------------------------------------------+
 
 uint8_t const desc_hid_report_joy[] = {
-    CHUPICO_REPORT_DESC_JOYSTICK,
-};
-
-uint8_t const desc_hid_report_led[] = {
-    CHUPICO_LED_HEADER,
-    CHUPICO_REPORT_DESC_LED_TOUCH_16,
-    CHUPICO_REPORT_DESC_LED_TOUCH_15,
-    CHUPICO_REPORT_DESC_LED_TOWER_6,
-    CHUPICO_REPORT_DESC_LED_COMPRESSED,
-    CHUPICO_LED_FOOTER
+    MAIPICO_REPORT_DESC_JOYSTICK,
 };
 
 uint8_t const desc_hid_report_nkro[] = {
-    CHUPICO_REPORT_DESC_NKRO,
+    MAIPICO_REPORT_DESC_NKRO,
 };
 
 // Invoked when received GET HID REPORT DESCRIPTOR
@@ -100,8 +74,6 @@ uint8_t const* tud_hid_descriptor_report_cb(uint8_t itf)
         case 0:
             return desc_hid_report_joy;
         case 1:
-            return desc_hid_report_led;
-        case 2:
             return desc_hid_report_nkro;
         default:
             return NULL;
@@ -111,26 +83,28 @@ uint8_t const* tud_hid_descriptor_report_cb(uint8_t itf)
 // Configuration Descriptor
 //--------------------------------------------------------------------+
 
-enum { ITF_NUM_JOY, ITF_NUM_LED, ITF_NUM_NKRO,
-       ITF_NUM_CDC, ITF_NUM_CDC_DATA,
-       ITF_NUM_CDC_TOUCH, ITF_NUM_CDC_DATA_TOUCH,
-       ITF_NUM_CDC_LED, ITF_NUM_CDC_DATA_LED,
+enum { ITF_NUM_JOY, ITF_NUM_NKRO,
+       ITF_NUM_CDC_CLI, ITF_NUM_CDC_CLI_DATA,
+       ITF_NUM_CDC_TOUCH, ITF_NUM_CDC_TOUCH_DATA,
+       ITF_NUM_CDC_LED, ITF_NUM_CDC_LED_DATA,
        ITF_NUM_TOTAL };
 
-#define CONFIG_TOTAL_LEN (TUD_CONFIG_DESC_LEN + TUD_HID_DESC_LEN * 3 + TUD_CDC_DESC_LEN * 3)
+#define CONFIG_TOTAL_LEN (TUD_CONFIG_DESC_LEN + TUD_HID_DESC_LEN * 2 + TUD_CDC_DESC_LEN * 3)
 
-#define EPNUM_JOY 0x84
-#define EPNUM_LED 0x85
-#define EPNUM_KEY 0x86
-#define EPNUM_CDC_NOTIF 0x81
-#define EPNUM_CDC_OUT   0x02
-#define EPNUM_CDC_IN    0x82
-#define EPNUM_CDC_TOUCH_NOTIF 0x87
-#define EPNUM_CDC_TOUCH_OUT   0x03
-#define EPNUM_CDC_TOUCH_IN    0x88
-#define EPNUM_CDC_LED_NOTIF 0x89
-#define EPNUM_CDC_LED_OUT   0x04
-#define EPNUM_CDC_LED_IN    0x8a
+#define EPNUM_JOY 0x81
+#define EPNUM_KEY 0x82
+
+#define EPNUM_CDC_CLI_NOTIF 0x83
+#define EPNUM_CDC_CLI_OUT   0x04
+#define EPNUM_CDC_CLI_IN    0x84
+
+#define EPNUM_CDC_TOUCH_NOTIF 0x85
+#define EPNUM_CDC_TOUCH_OUT 0x06
+#define EPNUM_CDC_TOUCH_IN  0x86
+#define EPNUM_CDC_LED_NOTIF 0x87
+#define EPNUM_CDC_LED_OUT 0x08
+#define EPNUM_CDC_LED_IN  0x88
+
 
 uint8_t const desc_configuration_joy[] = {
     // Config number, interface count, string index, total length, attribute,
@@ -144,22 +118,18 @@ uint8_t const desc_configuration_joy[] = {
                        sizeof(desc_hid_report_joy), EPNUM_JOY,
                        CFG_TUD_HID_EP_BUFSIZE, 1),
 
-    TUD_HID_DESCRIPTOR(ITF_NUM_LED, 5, HID_ITF_PROTOCOL_NONE,
-                       sizeof(desc_hid_report_led), EPNUM_LED,
-                       CFG_TUD_HID_EP_BUFSIZE, 4),
-
-    TUD_HID_DESCRIPTOR(ITF_NUM_NKRO, 6, HID_ITF_PROTOCOL_NONE,
+    TUD_HID_DESCRIPTOR(ITF_NUM_NKRO, 5, HID_ITF_PROTOCOL_NONE,
                        sizeof(desc_hid_report_nkro), EPNUM_KEY,
                        CFG_TUD_HID_EP_BUFSIZE, 1),
 
-    TUD_CDC_DESCRIPTOR(ITF_NUM_CDC, 7, EPNUM_CDC_NOTIF,
-                       8, EPNUM_CDC_OUT, EPNUM_CDC_IN, 64),
+    TUD_CDC_DESCRIPTOR(ITF_NUM_CDC_CLI, 6, EPNUM_CDC_CLI_NOTIF,
+                       8, EPNUM_CDC_CLI_OUT, EPNUM_CDC_CLI_IN, 64),
 
-    TUD_CDC_DESCRIPTOR(ITF_NUM_CDC_TOUCH, 8, EPNUM_CDC_TOUCH_NOTIF,
+    TUD_CDC_DESCRIPTOR(ITF_NUM_CDC_TOUCH, 7, EPNUM_CDC_TOUCH_NOTIF,
                        8, EPNUM_CDC_TOUCH_OUT, EPNUM_CDC_TOUCH_IN, 64),
 
-    TUD_CDC_DESCRIPTOR(ITF_NUM_CDC_LED, 9, EPNUM_CDC_LED_NOTIF,
-                       8, EPNUM_CDC_LED_OUT, EPNUM_CDC_LED_IN, 64)
+    TUD_CDC_DESCRIPTOR(ITF_NUM_CDC_LED, 8, EPNUM_CDC_LED_NOTIF,
+                       8, EPNUM_CDC_LED_OUT, EPNUM_CDC_LED_IN, 64),
 };
 
 // Invoked when received GET CONFIGURATION DESCRIPTOR
@@ -184,7 +154,7 @@ static const char *string_desc_arr[] = {
     "Mai Pico Joystick",
     "Mai Pico LED",
     "Mai Pico NKRO",
-    "Mai Pico Serial Port",
+    "Mai Pico Command Serial Port",
     "Mai Pico Touch Serial Port",
     "Mai Pico LED Serial Port",
 };
