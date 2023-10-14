@@ -66,6 +66,8 @@ It's CC-NC. So DIY for yourself and for your friend, don't make money from it.
   <img src="doc/ito_glass.jpg" width="70%">
 * The ITO coated glass is connected to the IO PCB by "zebra cable" (1.6mm pitch: 0.8mm black part and 0.8mm clear part). A silicon heater head at 200°C is used to stick the zebra cable to the gold finger part of PCB and ITO coated glass. The formal name of this cable is "Heat Seal Connector".  
   <img src="doc/zebra_cable.jpg" width="70%">
+* Custom ITO coated glass is relatively expensive, but ours is small, so it's like arcade-size expensive. This is the shop I ordered the ITO glass. The minimal batch is around 5 pieces. But they provide service only in China as far as I know.  
+  https://shop378788148.taobao.com/?spm=2013.1.1000126.2.305e16c4LFf1GW
 
 ### Button Ring
 * Print out the 8x set of base, link, button and cover from `Production\3DPrint\mai_*.stl`.
@@ -107,9 +109,9 @@ It's CC-NC. So DIY for yourself and for your friend, don't make money from it.
 
 ### Firmware
 * UF2 file is in `Production\Firmware` folder.
-* For the new build, hold the BOOTSEL button while connect the USB to a PC, there will be a disk named "RPI-RP2" showed up. Drag the UF2 firmware binary file into it. That's it. There's a small hole at the bottom side of the Chu Pico, it is facing right to the BOOTSEL button.
+* For the new build, hold the BOOTSEL button while connect the USB to a PC, there will be a disk named "RPI-RP2" showed up. Drag the UF2 firmware binary file into it. That's it.
 * LED and Touch protocols are implemented following Sucareto's research at https://github.com/Sucareto/Mai2Touch.
-* It has a command line to do configuration. You can use this Web Serial Terminal to connect to the USB serial port of the Chu Pico. (Note: "?" is for help)  
+* It has a command line to do configuration. You can use this Web Serial Terminal to connect to the USB serial port of the Mai Pico. (Note: "?" is for help)  
   https://googlechromelabs.github.io/serial-terminal/  
   <img src="doc/cmd.png" width="80%">
 * It implements 3 COM ports, one is for command line and the other two are for LED and Touch. By issuing "whoami" to the command line, each COM port will print their identities.
