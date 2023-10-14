@@ -4,6 +4,7 @@
 
 #include <limits.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <hidsdi.h>
 #include <setupapi.h>
@@ -94,32 +95,28 @@ HANDLE hid_open_device(uint16_t vid, uint16_t pid, uint8_t mi, bool first)
                             NULL, OPEN_EXISTING, 0, NULL);
 }
 
-int hid_get_report(HANDLE handle, uint8_t *buf, uint8_t report_id, uint8_t nb_bytes)
+static bool hid_get_report(HANDLE handle, uint8_t *buf, uint8_t report_id, uint8_t size)
 {
     DWORD bytesRead = 0;
 	uint8_t tmp_buf[128];
 	
-	if (buf == NULL) {
-        return -1;
-    }
-	
     tmp_buf[0] = report_id;
-
-    ReadFile(handle, tmp_buf, nb_bytes, &bytesRead, NULL);
-    // bytesRead should either be nb_bytes*2 (if it successfully read 2 reports) or nb_bytes (only one)
-    if (bytesRead != nb_bytes) {
-        return -1;
+    if (!ReadFile(handle, tmp_buf, 3 * size, &bytesRead, NULL)) {
+        return false;
     }
 
-    /* HID read ok, copy latest report bytes */
-    memcpy(buf, tmp_buf, nb_bytes);
-	
-    return 0;	
+    if (bytesRead == 0 || bytesRead % size != 0) {
+        return false;
+    }
+
+    /* only the latest report */
+    memcpy(buf, tmp_buf + bytesRead - size, size);
+    return true;
 }
 
 static uint8_t mai2_opbtn;
-static uint16_t mai2_player1_btn;
-static uint16_t mai2_player2_btn;
+static uint16_t mai2_p1_btn;
+static uint16_t mai2_p2_btn;
 static struct mai2_io_config mai2_io_cfg;
 static bool mai2_io_coin;
 
@@ -171,44 +168,48 @@ typedef struct joy_report_s {
 
 HRESULT mai2_io_poll(void)
 {
-    mai2_opbtn = 0;
-    mai2_player1_btn = 0;
-    mai2_player2_btn = 0;
+    uint8_t opbtn = 0;
 
     if (GetAsyncKeyState(mai2_io_cfg.vk_test) & 0x8000) {
-        mai2_opbtn |= MAI2_IO_OPBTN_TEST;
+        opbtn |= MAI2_IO_OPBTN_TEST;
     }
 
     if (GetAsyncKeyState(mai2_io_cfg.vk_service) & 0x8000) {
-        mai2_opbtn |= MAI2_IO_OPBTN_SERVICE;
+        opbtn |= MAI2_IO_OPBTN_SERVICE;
     }
 
     if (GetAsyncKeyState(mai2_io_cfg.vk_coin) & 0x8000) {
         if (!mai2_io_coin) {
             mai2_io_coin = true;
-            mai2_opbtn |= MAI2_IO_OPBTN_COIN;
+            opbtn |= MAI2_IO_OPBTN_COIN;
         }
     } else {
         mai2_io_coin = false;
     }
+    mai2_opbtn = opbtn;
 
     if (joy1_handle != INVALID_HANDLE_VALUE) {
         joy_report_t joy_data;
-    	hid_get_report(joy1_handle, (uint8_t *)&joy_data, 0x01, sizeof(joy_data));
-        mai2_player1_btn = joy_data.buttons;
+    	if (hid_get_report(joy1_handle, (uint8_t *)&joy_data, 0x01, sizeof(joy_data))) {
+            if (mai2_io_cfg.swap_btn) {
+                mai2_p2_btn = joy_data.buttons;
+            } else {
+                mai2_p1_btn = joy_data.buttons;
+            }
+        }
     }
 
     if (joy2_handle != INVALID_HANDLE_VALUE) {
         joy_report_t joy_data;
-        hid_get_report(joy2_handle, (uint8_t *)&joy_data, 0x01, sizeof(joy_data));
-        mai2_player2_btn = joy_data.buttons;
+        if (hid_get_report(joy2_handle, (uint8_t *)&joy_data, 0x01, sizeof(joy_data))) {
+            if (mai2_io_cfg.swap_btn) {
+                mai2_p1_btn = joy_data.buttons;
+            } else {
+                mai2_p2_btn = joy_data.buttons;
+            }
+        }
     }
 
-    if (mai2_io_cfg.swap_btn) {
-        uint16_t tmp = mai2_player1_btn;
-        mai2_player1_btn = mai2_player2_btn;
-        mai2_player2_btn = tmp;
-    }
     return S_OK;
 }
 
@@ -222,10 +223,10 @@ void mai2_io_get_opbtns(uint8_t *opbtn)
 void mai2_io_get_gamebtns(uint16_t *player1, uint16_t *player2)
 {
     if (player1 != NULL) {
-        *player1 = mai2_player1_btn;
+        *player1 = mai2_p1_btn;
     }
 
     if (player2 != NULL ){
-        *player2 = mai2_player2_btn;
+        *player2 = mai2_p2_btn;
     }
 }
