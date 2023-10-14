@@ -3,3 +3,5 @@ Production/PCB/Turntable
 Production/PCB/teeny_iidx
 .editorconfig
 .vscode
+firmware/mai2/mai2hook
+PCB/IO/mai_io-backups
