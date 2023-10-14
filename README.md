@@ -66,7 +66,7 @@ It's CC-NC. So DIY for yourself and for your friend, don't make money from it.
   <img src="doc/ito_glass.jpg" width="70%">
 * The ITO coated glass is connected to the IO PCB by "zebra cable" (1.6mm pitch: 0.8mm black part and 0.8mm clear part). A silicon heater head at 200°C is used to stick the zebra cable to the gold finger part of PCB and ITO coated glass. The formal name of this cable is "Heat Seal Connector".  
   <img src="doc/zebra_cable.jpg" width="70%">
-* Custom ITO coated glass is relatively expensive, but ours is small, so it's like arcade-size expensive. This is the shop I ordered the ITO glass. The minimal batch is around 5 pieces. But they provide service only in China as far as I know.  
+* Custom ITO coated glass is relatively expensive, but ours is small, so it's not like arcade-size expensive. This is the shop I ordered the ITO glass. The minimal batch is around 5 pieces. But they provide service only in China as far as I know.  
   https://shop378788148.taobao.com/?spm=2013.1.1000126.2.305e16c4LFf1GW
 
 ### Button Ring
