@@ -175,7 +175,7 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid)
     if (index == 3) {
         pico_unique_board_id_t board_id;
         pico_get_unique_board_id(&board_id);
-        sprintf(serial_number_str, "%016llx", board_id);
+        sprintf(serial_number_str, "%016llx", *(uint64_t *)&board_id);
     }
     
     const size_t base_num = sizeof(string_desc_arr) / sizeof(string_desc_arr[0]);

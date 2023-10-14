@@ -4,7 +4,7 @@ set(LWIP_ROOT ${PICO_SDK_PATH}/lib/lwip)
 function(make_firmware board board_def)
     pico_sdk_init()
     add_executable(${board}
-        main.c touch.c button.c rgb.c save.c config.c cli.c commands.c io.c
+        main.c touch.c button.c rgb.c save.c config.c cli.c commands.c io.c hid.c
         mpr121.c usb_descriptors.c)
     target_compile_definitions(${board} PUBLIC ${board_def})
     pico_enable_stdio_usb(${board} 1)

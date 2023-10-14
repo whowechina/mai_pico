@@ -115,9 +115,9 @@ static inline uint32_t apply_level(uint32_t color)
     unsigned g = (color >> 8) & 0xff;
     unsigned b = color & 0xff;
 
-    r = r * mai_cfg->style.level / 255;
-    g = g * mai_cfg->style.level / 255;
-    b = b * mai_cfg->style.level / 255;
+    r = r * mai_cfg->color.level / 255;
+    g = g * mai_cfg->color.level / 255;
+    b = b * mai_cfg->color.level / 255;
 
     return r << 16 | g << 8 | b;
 }

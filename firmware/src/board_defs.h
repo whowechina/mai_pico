@@ -15,7 +15,11 @@
 #define RGB_BUTTON_MAP { 5, 4, 3, 2, 1, 0, 7, 6 }
 
 #define BUTTON_DEF { 1, 0, 4, 5, 8, 9, 3, 2 }
-#define BUTTON_NKRO_MAP "WEDCXZAQ"
+
+/* HID Keycode: https://github.com/hathach/tinyusb/blob/master/src/class/hid/hid.h */
+// P1: WEDCXZAQ34 P2: (Numpad)89632147*-
+#define BUTTON_NKRO_MAP_P1 "\x1a\x08\x07\x06\x1b\x1d\x04\x14\x20\x21"
+#define BUTTON_NKRO_MAP_P2 "\x60\x61\x5e\x5b\x5a\x59\x5c\x5f\x55\x56"
 
 #define TOUCH_MAP { E3, A2, B2, D2, E2, A1, B1, D1, E1, C2, A8, B8, \
                     D8, E8, A7, B7, D7, E7, A6, B6, D6, E6, A5, B5, \

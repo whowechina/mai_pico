@@ -12,22 +12,10 @@
 mai_cfg_t *mai_cfg;
 
 static mai_cfg_t default_cfg = {
-    .colors = {
-        .key_on_upper = 0x00FF00,
-        .key_on_lower = 0xff0000,
-        .key_on_both = 0xff0000,
-        .key_off = 0x000000,
-        .gap = 0x000000,
-    },
-    .style = {
-        .key = 0,
-        .gap = 0,
-        .tof = 0,
+    .color = {
+        .key_on = 0xc0c0c0,
+        .key_off = 0x080808,
         .level = 127,
-    },
-    .tof = {
-        .offset = 100,
-        .pitch = 28,
     },
     .sense = {
         .filter = 0x10,
@@ -44,15 +32,6 @@ mai_runtime_t *mai_runtime;
 
 static void config_loaded()
 {
-    if (mai_cfg->style.level > 10) {
-        mai_cfg->style.level = default_cfg.style.level;
-        config_changed();
-    }
-    if ((mai_cfg->tof.offset < 40) ||
-        (mai_cfg->tof.pitch < 4) || (mai_cfg->tof.pitch > 50)) {
-        mai_cfg->tof = default_cfg.tof;
-        config_changed();
-    }
     if ((mai_cfg->sense.filter & 0x0f) > 3 ||
         ((mai_cfg->sense.filter >> 4) & 0x0f) > 3) {
         mai_cfg->sense.filter = default_cfg.sense.filter;

@@ -19,6 +19,7 @@
 
 #include "hardware/flash.h"
 #include "pico/multicore.h"
+#include "pico/unique_id.h"
 
 static struct {
     size_t size;
@@ -107,6 +108,27 @@ static void save_loaded()
     for (int i = 0; i < module_num; i++) {
         modules[i].after_load();
     }
+}
+
+static union __attribute__((packed)) {
+    pico_unique_board_id_t id;
+    struct {
+        uint32_t id32h;
+        uint32_t id32l;
+    };
+    uint64_t id64;
+} board_id;
+
+uint32_t board_id_32()
+{
+    pico_get_unique_board_id(&board_id.id);
+    return board_id.id32h ^ board_id.id32l;
+}
+
+uint64_t board_id_64()
+{
+    pico_get_unique_board_id(&board_id.id);
+    return board_id.id64;
 }
 
 void save_init(uint32_t magic, mutex_t *locker)

@@ -6,8 +6,8 @@
 
 #include "pico/stdio.h"
 #include "pico/stdlib.h"
-#include "pico/unique_id.h"
 #include "cli.h"
+#include "save.h"
 
 #define MAX_COMMANDS 32
 #define MAX_PARAMETERS 6
@@ -58,9 +58,7 @@ int cli_match_prefix(const char *str[], int num, const char *prefix)
 static void handle_help(int argc, char *argv[])
 {
     printf("%s", cli_logo);
-    pico_unique_board_id_t sn;
-    pico_get_unique_board_id(&sn);
-    printf("\tSN: %016llx\n\n", sn);
+    printf("\tSN: %016llx\n\n", board_id_64());
     printf("Available commands:\n");
     for (int i = 0; i < num_commands; i++) {
         printf("%*s: %s\n", max_cmd_len + 2, commands[i], helps[i]);

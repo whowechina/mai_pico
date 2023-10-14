@@ -12,6 +12,9 @@
 
 #include "pico/multicore.h"
 
+uint32_t board_id_32();
+uint64_t board_id_64();
+
 /* It's safer to lock other I/O ops during saving, so we need a locker */
 typedef void (*io_locker_func)(bool pause);
 void save_init(uint32_t magic, mutex_t *lock);

@@ -17,21 +17,11 @@
 #define SENSE_LIMIT_MAX 9
 #define SENSE_LIMIT_MIN -9
 
-static void disp_colors()
+static void disp_color()
 {
-    printf("[Colors]\n");
-    printf("  Key upper: %06x, lower: %06x, both: %06x, off: %06x\n", 
-           mai_cfg->colors.key_on_upper, mai_cfg->colors.key_on_lower,
-           mai_cfg->colors.key_on_both, mai_cfg->colors.key_off);
-    printf("  Gap: %06x\n", mai_cfg->colors.gap);
-}
-
-static void disp_style()
-{
-    printf("[Style]\n");
-    printf("  Key: %d, Gap: %d, ToF: %d, Level: %d\n",
-           mai_cfg->style.key, mai_cfg->style.gap,
-           mai_cfg->style.tof, mai_cfg->style.level);
+    printf("[Color]\n");
+    printf("  Key on: %06x, off: %06x\n  Level: %d\n",
+           mai_cfg->color.key_on, mai_cfg->color.key_off, mai_cfg->color.level);
 }
 
 static void disp_sense()
@@ -59,39 +49,35 @@ static void disp_sense()
 static void disp_hid()
 {
     printf("[HID]\n");
-    printf("  Joy: %s, NKRO: %s.\n", 
-           mai_cfg->hid.joy ? "on" : "off",
-           mai_cfg->hid.nkro ? "on" : "off" );
+    const char *nkro[] = {"off", "key1", "key2"};
+    printf("  Joy: %s, NKRO: %s\n", mai_cfg->hid.joy ? "on" : "off",
+           mai_cfg->hid.nkro <= 2 ? nkro[mai_cfg->hid.nkro] : "key1");
 }
 
 void handle_display(int argc, char *argv[])
 {
-    const char *usage = "Usage: display [colors|style|tof|sense|hid]\n";
+    const char *usage = "Usage: display [color|sense|hid]\n";
     if (argc > 1) {
         printf(usage);
         return;
     }
 
     if (argc == 0) {
-        disp_colors();
-        disp_style();
+        disp_color();
         disp_sense();
         disp_hid();
         return;
     }
 
-    const char *choices[] = {"colors", "style", "sense", "hid"};
-    switch (cli_match_prefix(choices, 5, argv[0])) {
+    const char *choices[] = {"color", "sense", "hid"};
+    switch (cli_match_prefix(choices, 3, argv[0])) {
         case 0:
-            disp_colors();
+            disp_color();
             break;
         case 1:
-            disp_style();
-            break;
-        case 2:
             disp_sense();
             break;
-        case 3:
+        case 2:
             disp_hid();
             break;
         default:
@@ -114,9 +100,9 @@ static void handle_level(int argc, char *argv[])
         return;
     }
 
-    mai_cfg->style.level = level;
+    mai_cfg->color.level = level;
     config_changed();
-    disp_style();
+    disp_color();
 }
 
 static void handle_stat(int argc, char *argv[])
@@ -143,21 +129,35 @@ static void handle_stat(int argc, char *argv[])
 
 static void handle_hid(int argc, char *argv[])
 {
-    const char *usage = "Usage: hid <joy|nkro|both>\n";
+    const char *usage = "Usage: hid <joy|key1|key2\n";
     if (argc != 1) {
         printf(usage);
         return;
     }
 
-    const char *choices[] = {"joy", "nkro", "both"};
+    const char *choices[] = {"joy", "key1", "key2"};
     int match = cli_match_prefix(choices, 3, argv[0]);
     if (match < 0) {
         printf(usage);
         return;
     }
 
-    mai_cfg->hid.joy = ((match == 0) || (match == 2)) ? 1 : 0;
-    mai_cfg->hid.nkro = ((match == 1) || (match == 2)) ? 1 : 0;
+    switch (match) {
+            break;
+        case 1:
+            mai_cfg->hid.joy = 0;
+            mai_cfg->hid.nkro = 1;
+            break;
+        case 2:
+            mai_cfg->hid.joy = 0;
+            mai_cfg->hid.nkro = 2;
+            break;
+        case 0:
+        default:
+            mai_cfg->hid.joy = 1;
+            mai_cfg->hid.nkro = 0;
+            break;
+    }
     config_changed();
     disp_hid();
 }
