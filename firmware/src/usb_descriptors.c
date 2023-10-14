@@ -148,11 +148,10 @@ static char serial_number_str[24] = "123456\0";
 // array of pointer to string descriptors
 static const char *string_desc_arr[] = {
     (const char[]){0x09, 0x04},  // 0: is supported language is English (0x0409)
-    "WHowe"       ,              // 1: Manufacturer
+    "WHowe",                     // 1: Manufacturer
     "Mai Pico Controller",       // 2: Product
     serial_number_str,           // 3: Serials, use chip ID
     "Mai Pico Joystick",
-    "Mai Pico LED",
     "Mai Pico NKRO",
     "Mai Pico Command Serial Port",
     "Mai Pico Touch Serial Port",
