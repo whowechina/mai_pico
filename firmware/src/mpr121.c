@@ -80,21 +80,21 @@ void mpr121_init(uint8_t i2c_addr)
 
     //touch pad baseline filter 
     //rising: baseline quick rising 
-    write_reg(i2c_addr, 0x2B, 0x01); // Max half delta Rising 
-    write_reg(i2c_addr, 0x2C, 0x01); // Noise half delta Rising 
-    write_reg(i2c_addr, 0x2D, 0x00); // Noise count limit Rising 
-    write_reg(i2c_addr, 0x2E, 0x00); // Delay limit Rising
+    write_reg(i2c_addr, 0x2B, 1); // Max half delta Rising 
+    write_reg(i2c_addr, 0x2C, 1); // Noise half delta Rising 
+    write_reg(i2c_addr, 0x2D, 1); // Noise count limit Rising 
+    write_reg(i2c_addr, 0x2E, 1); // Delay limit Rising
 
     //falling: baseline slow falling 
-    write_reg(i2c_addr, 0x2F, 0x01); // Max half delta Falling 
-    write_reg(i2c_addr, 0x30, 0x01); // Noise half delta Falling 
-    write_reg(i2c_addr, 0x31, 0xFF); // Noise count limit Falling 
-    write_reg(i2c_addr, 0x32, 0x0F); // Delay limit Falling
+    write_reg(i2c_addr, 0x2F, 1); // Max half delta Falling 
+    write_reg(i2c_addr, 0x30, 1); // Noise half delta Falling 
+    write_reg(i2c_addr, 0x31, 6); // Noise count limit Falling 
+    write_reg(i2c_addr, 0x32, 12); // Delay limit Falling
 
-    //touched: baseline keep 
-    write_reg(i2c_addr, 0x33, 0x00); // Noise half delta Touched 
-    write_reg(i2c_addr, 0x34, 0x00); // Noise count Touched 
-    write_reg(i2c_addr, 0x35, 0x00); // Delay limit Touched 
+    //touched: baseline very slow falling
+    write_reg(i2c_addr, 0x33, 1); // Noise half delta Touched 
+    write_reg(i2c_addr, 0x34, 8); // Noise count Touched 
+    write_reg(i2c_addr, 0x35, 30); // Delay limit Touched 
 
     //Touch pad threshold 
     for (int i = 0; i < 12; i++) {
