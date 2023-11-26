@@ -12,9 +12,9 @@
 
 #define RGB_PIN 13
 #define RGB_ORDER GRB // or RGB
-#define RGB_BUTTON_MAP { 5, 4, 3, 2, 1, 0, 7, 6 }
+#define RGB_BUTTON_MAP { 5, 4, 3, 2, 1, 0, 7, 6, 8, 9 }
 
-#define BUTTON_DEF { 1, 0, 4, 5, 8, 9, 3, 2 }
+#define BUTTON_DEF { 1, 0, 4, 5, 8, 9, 3, 2, 10, 11 }
 
 /* HID Keycode: https://github.com/hathach/tinyusb/blob/master/src/class/hid/hid.h */
 // P1: WEDCXZAQ34 P2: (Numpad)89632147*-

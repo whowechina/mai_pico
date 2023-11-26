@@ -17,9 +17,11 @@
 #define SENSE_LIMIT_MAX 9
 #define SENSE_LIMIT_MIN -9
 
-static void disp_color()
+static void disp_rgb()
 {
-    printf("[Color]\n");
+    printf("[RGB]\n");
+    printf("  Number per button: %d, number per aux: %d\n",
+            mai_cfg->rgb.per_button, mai_cfg->rgb.per_aux);
     printf("  Key on: %06x, off: %06x\n  Level: %d\n",
            mai_cfg->color.key_on, mai_cfg->color.key_off, mai_cfg->color.level);
 }
@@ -56,23 +58,23 @@ static void disp_hid()
 
 void handle_display(int argc, char *argv[])
 {
-    const char *usage = "Usage: display [color|sense|hid]\n";
+    const char *usage = "Usage: display [rgb|sense|hid]\n";
     if (argc > 1) {
         printf(usage);
         return;
     }
 
     if (argc == 0) {
-        disp_color();
+        disp_rgb();
         disp_sense();
         disp_hid();
         return;
     }
 
-    const char *choices[] = {"color", "sense", "hid"};
+    const char *choices[] = {"rgb", "sense", "hid"};
     switch (cli_match_prefix(choices, 3, argv[0])) {
         case 0:
-            disp_color();
+            disp_rgb();
             break;
         case 1:
             disp_sense();
@@ -84,6 +86,29 @@ void handle_display(int argc, char *argv[])
             printf(usage);
             break;
     }
+}
+
+static void handle_rgb(int argc, char *argv[])
+{
+    const char *usage = "Usage: rgb <1..16> <1..16>\n";
+    if (argc != 2) {
+        printf(usage);
+        return;
+    }
+
+    int per_button = cli_extract_non_neg_int(argv[0], 0);
+    int per_aux = cli_extract_non_neg_int(argv[1], 0);    
+    if ((per_button < 1) || (per_button > 16) ||
+        (per_aux < 1) || (per_aux > 16)) {
+        printf(usage);
+        return;
+    }
+
+    mai_cfg->rgb.per_button = per_button;
+    mai_cfg->rgb.per_aux = per_aux;
+
+    config_changed();
+    disp_rgb();
 }
 
 static void handle_level(int argc, char *argv[])
@@ -102,7 +127,7 @@ static void handle_level(int argc, char *argv[])
 
     mai_cfg->color.level = level;
     config_changed();
-    disp_color();
+    disp_rgb();
 }
 
 static void handle_stat(int argc, char *argv[])
@@ -341,6 +366,7 @@ static void handle_factory_reset()
 void commands_init()
 {
     cli_register("display", handle_display, "Display all config.");
+    cli_register("rgb", handle_rgb, "Set RGB LED number for main button and aux buttons.");
     cli_register("level", handle_level, "Set LED brightness level.");
     cli_register("stat", handle_stat, "Display or reset statistics.");
     cli_register("hid", handle_hid, "Set HID mode.");

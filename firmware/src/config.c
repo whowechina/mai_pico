@@ -26,9 +26,17 @@ static mai_cfg_t default_cfg = {
         .joy = 1,
         .nkro = 0,
     },
+    .rgb = {
+        .per_button = 8,
+        .per_aux = 2,
+    }
 };
 
 mai_runtime_t *mai_runtime;
+static inline bool in_range(int val, int min, int max)
+{
+    return (val >= min) && (val <= max);
+}
 
 static void config_loaded()
 {
@@ -37,20 +45,26 @@ static void config_loaded()
         mai_cfg->sense.filter = default_cfg.sense.filter;
         config_changed();
     }
-    if ((mai_cfg->sense.global > 9) || (mai_cfg->sense.global < -9)) {
+    if (!in_range(mai_cfg->sense.global, -9, 9)) {
         mai_cfg->sense.global = default_cfg.sense.global;
         config_changed();
     }
     for (int i = 0; i < 32; i++) {
-        if ((mai_cfg->sense.keys[i] > 9) || (mai_cfg->sense.keys[i] < -9)) {
+        if (!in_range(mai_cfg->sense.keys[i], -9, 9)) {
             mai_cfg->sense.keys[i] = default_cfg.sense.keys[i];
             config_changed();
         }
     }
-    if ((mai_cfg->sense.debounce_touch > 7) |
-        (mai_cfg->sense.debounce_release > 7)) {
+    if (!in_range(mai_cfg->sense.debounce_touch, 0, 7) ||
+        !in_range(mai_cfg->sense.debounce_release, 0, 7)) {
         mai_cfg->sense.debounce_touch = default_cfg.sense.debounce_touch;
         mai_cfg->sense.debounce_release = default_cfg.sense.debounce_release;
+        config_changed();
+    }
+
+    if (!in_range(mai_cfg->rgb.per_button, 1, 16) ||
+        !in_range(mai_cfg->rgb.per_aux, 1, 16)) {
+        mai_cfg->rgb = default_cfg.rgb;
         config_changed();
     }
 }
