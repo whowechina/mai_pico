@@ -27,8 +27,8 @@ static mai_cfg_t default_cfg = {
         .nkro = 0,
     },
     .rgb = {
-        .per_button = 8,
-        .per_aux = 2,
+        .per_button = 1,
+        .per_aux = 1,
     }
 };
 
