@@ -229,9 +229,9 @@ static void send_touch()
         return;
     }
 
-    static uint32_t last_sent_time = 0;
-    uint32_t now = time_us_32();
-    if (now - last_sent_time < 5000) {
+    static uint64_t last_sent_time = 0;
+    uint64_t now = time_us_64();
+    if (now - last_sent_time < 1000) {
         return;
     }
     last_sent_time = now;
