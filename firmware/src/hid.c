@@ -10,7 +10,13 @@
 #include "hid.h"
 
 struct __attribute__((packed)) {
-    uint16_t buttons;
+    uint16_t adcs[8];
+    uint16_t spinners[4];
+    uint16_t chutes[2];
+    uint16_t buttons[2];
+    uint8_t system_status;
+    uint8_t usb_status;
+    uint8_t padding[29];
 } hid_joy;
 
 struct __attribute__((packed)) {
@@ -18,11 +24,28 @@ struct __attribute__((packed)) {
     uint8_t keymap[15];
 } hid_nkro;
 
+static uint16_t native_to_io4(uint16_t button)
+{
+    static const int target_pos[] = { 2, 3, 0, 15, 14, 13, 12, 11, 1, 9, 6 };
+    uint16_t io4btn = 0;
+    for (int i = 0; i < 8; i++) {
+        bool pressed = button & (1 << i);
+        io4btn |= pressed ? 0 : (1 << target_pos[i]);
+    }
+    for (int i = 8; i < 11; i++) {
+        bool pressed = button & (1 << i);
+        io4btn |= pressed ? (1 << target_pos[i]) : 0;
+    }
+    return io4btn;
+}
+
 static void report_usb_hid()
 {
     if (tud_hid_ready()) {
         if (mai_cfg->hid.joy) {
-            hid_joy.buttons = button_read();
+            uint16_t buttons = button_read();
+            hid_joy.buttons[0] = native_to_io4(buttons);
+            hid_joy.buttons[1] = native_to_io4(0);
             tud_hid_n_report(0, REPORT_ID_JOYSTICK, &hid_joy, sizeof(hid_joy));
         }
         if (mai_cfg->hid.nkro) {
@@ -31,8 +54,8 @@ static void report_usb_hid()
     }
 }
 
-const char keymap_p1[10] = BUTTON_NKRO_MAP_P1;
-const char keymap_p2[10] = BUTTON_NKRO_MAP_P2;
+const char keymap_p1[] = BUTTON_NKRO_MAP_P1;
+const char keymap_p2[] = BUTTON_NKRO_MAP_P2;
 
 static void gen_nkro_report()
 {

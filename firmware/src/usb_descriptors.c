@@ -36,8 +36,8 @@ tusb_desc_device_t desc_device_joy = {
     .bDeviceProtocol = 0x00,
     .bMaxPacketSize0 = CFG_TUD_ENDPOINT0_SIZE,
 
-    .idVendor = 0x1f2d,
-    .idProduct = 0x0123,
+    .idVendor = 0x0ca3,
+    .idProduct = 0x0021,
     .bcdDevice = 0x0100,
 
     .iManufacturer = 0x01,
@@ -148,10 +148,10 @@ static char serial_number_str[24] = "123456\0";
 // array of pointer to string descriptors
 static const char *string_desc_arr[] = {
     (const char[]){0x09, 0x04},  // 0: is supported language is English (0x0409)
-    "WHowe",                     // 1: Manufacturer
-    "Mai Pico Controller",       // 2: Product
-    serial_number_str,           // 3: Serials, use chip ID
-    "Mai Pico Joystick",
+    "SEGA", // 1: Manufacturer
+    "Mai Pico", // 2: Product
+    serial_number_str, // 3: Serials, use chip ID
+    "I/O CONTROL BD;15257;01;90;1831;6679A;00;GOUT=14_ADIN=8,E_ROTIN=4_COININ=2_SWIN=2,E_UQ1=41,6;",
     "Mai Pico NKRO",
     "Mai Pico Command Serial Port",
     "Mai Pico Touch Serial Port",
@@ -163,7 +163,7 @@ static const char *string_desc_arr[] = {
 // enough for transfer to complete
 uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid)
 {
-    static uint16_t _desc_str[64];
+    static uint16_t _desc_str[128];
 
     if (index == 0) {
         memcpy(&_desc_str[1], string_desc_arr[0], 2);
@@ -176,32 +176,11 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid)
         pico_get_unique_board_id(&board_id);
         sprintf(serial_number_str, "%016llx", *(uint64_t *)&board_id);
     }
-    
-    const size_t base_num = sizeof(string_desc_arr) / sizeof(string_desc_arr[0]);
-    const char *colors[] = {"Blue", "Red", "Green"};
-    char str[64];
 
-    if (index < base_num) {
-        strcpy(str, string_desc_arr[index]);
-    } else if (index < base_num + 48 + 45) {
-        const char *names[] = {"Key ", "Splitter "};
-        int led = index - base_num;
-        int id = led / 6 + 1;
-        int type = led / 3 % 2;
-        int brg = led % 3;
-        sprintf(str, "%s%02d %s", names[type], id, colors[brg]);
-    } else if (index < base_num + 48 + 45 + 18) {
-        int led = index - base_num - 48 - 45;
-        int id = led / 3 + 1;
-        int brg = led % 3;
-        sprintf(str, "Tower %02d %s", id, colors[brg]);
-    } else {
-        sprintf(str, "Unknown %d", index);
-    }
-
+    const char *str = string_desc_arr[index];
     uint8_t chr_count = strlen(str);
-    if (chr_count > 63) {
-        chr_count = 63;
+    if (chr_count > 128) {
+        chr_count = 128;
     }
 
     // Convert ASCII string into UTF-16

@@ -10,6 +10,7 @@
 #include "tusb.h"
 
 #include "touch.h"
+#include "button.h"
 #include "config.h"
 #include "save.h"
 #include "cli.h"
@@ -367,7 +368,7 @@ static void handle_save()
     save_request(true);
 }
 
-static void handle_factory_reset()
+static void handle_joy_reset()
 {
     config_factory_reset();
     printf("Factory reset done.\n");
