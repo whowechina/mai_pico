@@ -20,7 +20,7 @@ typedef struct __attribute__((packed)) {
         int8_t global;
         uint8_t debounce_touch;
         uint8_t debounce_release;        
-        int8_t keys[32];
+        int8_t zones[34];
     } sense;
     struct {
         uint8_t joy : 4;

@@ -134,7 +134,8 @@ void touch_update_config()
         mpr121_debounce(MPR121_ADDR + m, mai_cfg->sense.debounce_touch,
                                          mai_cfg->sense.debounce_release);
         mpr121_sense(MPR121_ADDR + m, mai_cfg->sense.global,
-                                      mai_cfg->sense.keys + m * 12);
+                                      mai_cfg->sense.zones + m * 12,
+                                      m != 2 ? 12 : 10);
         mpr121_filter(MPR121_ADDR + m, mai_cfg->sense.filter >> 6,
                                        (mai_cfg->sense.filter >> 4) & 0x03,
                                        mai_cfg->sense.filter & 0x07);

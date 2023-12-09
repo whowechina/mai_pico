@@ -23,8 +23,8 @@ static mai_cfg_t default_cfg = {
         .debounce_release = 2,
      },
     .hid = {
-        .joy = 1,
-        .nkro = 0,
+        .joy = 0,
+        .nkro = 1,
     },
     .rgb = {
         .per_button = 1,
@@ -42,23 +42,23 @@ static void config_loaded()
 {
     if ((mai_cfg->sense.filter & 0x0f) > 3 ||
         ((mai_cfg->sense.filter >> 4) & 0x0f) > 3) {
-        mai_cfg->sense.filter = default_cfg.sense.filter;
+        mai_cfg->sense = default_cfg.sense;
         config_changed();
     }
     if (!in_range(mai_cfg->sense.global, -9, 9)) {
-        mai_cfg->sense.global = default_cfg.sense.global;
+        mai_cfg->sense = default_cfg.sense;
         config_changed();
     }
-    for (int i = 0; i < 32; i++) {
-        if (!in_range(mai_cfg->sense.keys[i], -9, 9)) {
-            mai_cfg->sense.keys[i] = default_cfg.sense.keys[i];
+    for (int i = 0; i < 34; i++) {
+        if (!in_range(mai_cfg->sense.zones[i], -9, 9)) {
+            mai_cfg->sense = default_cfg.sense;
             config_changed();
+            break;
         }
     }
     if (!in_range(mai_cfg->sense.debounce_touch, 0, 7) ||
         !in_range(mai_cfg->sense.debounce_release, 0, 7)) {
-        mai_cfg->sense.debounce_touch = default_cfg.sense.debounce_touch;
-        mai_cfg->sense.debounce_release = default_cfg.sense.debounce_release;
+        mai_cfg->sense = default_cfg.sense;
         config_changed();
     }
 

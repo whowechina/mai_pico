@@ -26,6 +26,15 @@ static void disp_rgb()
            mai_cfg->color.key_on, mai_cfg->color.key_off, mai_cfg->color.level);
 }
 
+static void print_sense_zone(const char *title, const uint8_t *zones, int num)
+{
+    printf("   %s |", title);
+    for (int i = 0; i < num; i++) {
+        printf("%2d |", zones[i]);
+    }
+    printf("\n");
+}
+
 static void disp_sense()
 {
     printf("[Sense]\n");
@@ -33,17 +42,12 @@ static void disp_sense()
                                     (mai_cfg->sense.filter >> 4) & 0x03,
                                     mai_cfg->sense.filter & 0x07);
     printf("  Sensitivity (global: %+d):\n", mai_cfg->sense.global);
-    printf("    | 1| 2| 3| 4| 5| 6| 7| 8| 9|10|11|12|13|14|15|16|\n");
-    printf("  ---------------------------------------------------\n");
-    printf("  A |");
-    for (int i = 0; i < 16; i++) {
-        printf("%+2d|", mai_cfg->sense.keys[i * 2]);
-    }
-    printf("\n  B |");
-    for (int i = 0; i < 16; i++) {
-        printf("%+2d|", mai_cfg->sense.keys[i * 2 + 1]);
-    }
-    printf("\n");
+    printf("     |_1_|_2_|_3_|_4_|_5_|_6_|_7_|_8_|\n");
+    print_sense_zone("A", mai_cfg->sense.zones, 8);
+    print_sense_zone("B", mai_cfg->sense.zones + 8, 8);
+    print_sense_zone("C", mai_cfg->sense.zones + 16, 2);
+    print_sense_zone("D", mai_cfg->sense.zones + 18, 8);
+    print_sense_zone("E", mai_cfg->sense.zones + 26, 8);
     printf("  Debounce (touch, release): %d, %d\n",
            mai_cfg->sense.debounce_touch, mai_cfg->sense.debounce_release);
 }
@@ -154,7 +158,7 @@ static void handle_stat(int argc, char *argv[])
 
 static void handle_hid(int argc, char *argv[])
 {
-    const char *usage = "Usage: hid <joy|key1|key2\n";
+    const char *usage = "Usage: hid <joy|key1|key2>\n";
     if (argc != 1) {
         printf(usage);
         return;
@@ -220,23 +224,23 @@ static void handle_filter(int argc, char *argv[])
 
 static uint8_t *extract_key(const char *param)
 {
-    int len = strlen(param);
-
-    int offset;
-    if (toupper(param[len - 1]) == 'A') {
-        offset = 0;
-    } else if (toupper(param[len - 1]) == 'B') {
-        offset = 1;
-    } else {
+    if (strlen(param) != 2) {
         return NULL;
     }
 
-    int id = cli_extract_non_neg_int(param, len - 1) - 1;
-    if ((id < 0) || (id > 15)) {
+    int zone = param[0] - 'A';
+    int id = param[1] - '1';
+
+    if (zone < 0 || zone > 4 || id < 0 || id > 7) {
         return NULL;
     }
+    if ((zone == 2) && (id > 1)) {
+        return NULL; // C1 and C2 only
+    }
 
-    return &mai_cfg->sense.keys[id * 2 + offset];
+    const int offsets[] = { 0, 8, 16, 18, 26 };
+
+    return &mai_cfg->sense.zones[offsets[zone] + id];
 }
 
 static void sense_do_op(int8_t *target, char op)
@@ -260,8 +264,8 @@ static void handle_sense(int argc, char *argv[])
                         "Example:\n"
                         "  >sense +\n"
                         "  >sense -\n"
-                        "  >sense 1A +\n"
-                        "  >sense 13B -\n";
+                        "  >sense A3 +\n"
+                        "  >sense C1 -\n";
                         "  >sense * 0\n";
     if ((argc < 1) || (argc > 2)) {
         printf(usage);
@@ -278,8 +282,8 @@ static void handle_sense(int argc, char *argv[])
         sense_do_op(&mai_cfg->sense.global, op[0]);
     } else {
         if (strcmp(argv[0], "*") == 0) {
-            for (int i = 0; i < 32; i++) {
-                sense_do_op(&mai_cfg->sense.keys[i], op[0]);
+            for (int i = 0; i < sizeof(mai_cfg->sense.zones); i++) {
+                sense_do_op(&mai_cfg->sense.zones[i], op[0]);
             }
         } else {
             uint8_t *key = extract_key(argv[0]);
@@ -328,19 +332,25 @@ static void handle_debounce(int argc, char *argv[])
     disp_sense();
 }
 
-static void handle_raw()
+static void print_raw_zones(const char *title, const uint16_t *raw, int num)
 {
-    printf("Key raw readings:\n");
-    const uint16_t *raw = touch_raw();
-    printf("|");
-    for (int i = 0; i < 16; i++) {
-        printf("%3d|", raw[i * 2]);
-    }
-    printf("\n|");
-    for (int i = 0; i < 16; i++) {
-        printf("%3d|", raw[i * 2 + 1]);
+    printf(" %s |", title);
+    for (int i = 0; i < num; i++) {
+        printf(" %3d |", raw[i]);
     }
     printf("\n");
+}
+
+static void handle_raw()
+{
+    printf("Touch raw readings:\n");
+    printf("   |__1__|__2__|__3__|__4__|__5__|__6__|__7__|__8__|\n");
+    const uint16_t *raw = touch_raw();
+    print_raw_zones("A", raw, 8);
+    print_raw_zones("B", raw + 8, 8);
+    print_raw_zones("C", raw + 16, 2);
+    print_raw_zones("D", raw + 18, 8);
+    print_raw_zones("E", raw + 26, 8);
 }
 
 static void handle_whoami()

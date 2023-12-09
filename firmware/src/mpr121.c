@@ -189,10 +189,10 @@ void mpr121_filter(uint8_t addr, uint8_t ffi, uint8_t sfi, uint8_t esi)
     mpr121_resume(addr, ecr);
 }
 
-void mpr121_sense(uint8_t addr, int8_t sense, int8_t *sense_keys)
+void mpr121_sense(uint8_t addr, int8_t sense, int8_t *sense_keys, int num)
 {
     uint8_t ecr = mpr121_stop(addr);
-    for (int i = 0; i < 12; i++) {
+    for (int i = 0; i < num; i++) {
         int8_t delta = sense + sense_keys[i];
         write_reg(addr, MPR121_TOUCH_THRESHOLD_REG + i * 2,
                         TOUCH_THRESHOLD_BASE - delta);
