@@ -29,7 +29,10 @@ static mai_cfg_t default_cfg = {
     .rgb = {
         .per_button = 1,
         .per_aux = 1,
-    }
+    },
+    .alt = {
+        .buttons = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+    },
 };
 
 mai_runtime_t *mai_runtime;

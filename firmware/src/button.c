@@ -16,9 +16,10 @@
 #include "config.h"
 #include "board_defs.h"
 
-static const uint8_t button_gpio[] = BUTTON_DEF;
+static const uint8_t gpio_def[] = BUTTON_DEF;
+static uint8_t gpio_real[] = BUTTON_DEF;
 
-#define BUTTON_NUM (sizeof(button_gpio))
+#define BUTTON_NUM (sizeof(gpio_def))
 
 static bool sw_val[BUTTON_NUM]; /* true if pressed */
 static uint64_t sw_freeze_time[BUTTON_NUM];
@@ -29,7 +30,11 @@ void button_init()
     {
         sw_val[i] = false;
         sw_freeze_time[i] = 0;
-        int8_t gpio = button_gpio[i];
+        uint8_t gpio = mai_cfg->alt.buttons[i];
+        if (gpio > 29) {
+            gpio = gpio_def[i];
+        }
+        gpio_real[i] = gpio;
         gpio_init(gpio);
         gpio_set_function(gpio, GPIO_FUNC_SIO);
         gpio_set_dir(gpio, GPIO_IN);
@@ -42,6 +47,14 @@ uint8_t button_num()
     return BUTTON_NUM;
 }
 
+uint8_t button_gpio(int id)
+{
+    if (id >= BUTTON_NUM) {
+        return 0xff;
+    }
+    return gpio_real[id];
+}
+
 static uint16_t button_reading;
 
 /* If a switch flips, it freezes for a while */
@@ -52,7 +65,7 @@ void button_update()
     uint16_t buttons = 0;
 
     for (int i = BUTTON_NUM - 1; i >= 0; i--) {
-        bool sw_pressed = !gpio_get(button_gpio[i]);
+        bool sw_pressed = !gpio_real[i];
         
         if (now >= sw_freeze_time[i]) {
             if (sw_pressed != sw_val[i]) {

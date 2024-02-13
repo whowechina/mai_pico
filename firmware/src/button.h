@@ -14,5 +14,6 @@ void button_init();
 uint8_t button_num();
 void button_update();
 uint16_t button_read();
+uint8_t button_gpio(int id);
 
 #endif

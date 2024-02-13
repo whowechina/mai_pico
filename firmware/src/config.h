@@ -30,6 +30,9 @@ typedef struct __attribute__((packed)) {
         uint8_t per_button;
         uint8_t per_aux;
     } rgb;
+    struct {
+        uint8_t buttons[12];
+    } alt;
 } mai_cfg_t;
 
 typedef struct {

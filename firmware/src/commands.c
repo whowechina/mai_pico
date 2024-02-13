@@ -61,9 +61,20 @@ static void disp_hid()
            mai_cfg->hid.nkro <= 2 ? nkro[mai_cfg->hid.nkro] : "key1");
 }
 
+static void disp_gpio()
+{
+    printf("[GPIO]\n");
+    printf("  Main buttons:");
+    for (int i = 0; i < 8; i++) {
+        printf(" %d:%d", i + 1, button_gpio(i));
+    }
+    printf("\n  Test:%d, Service:%d, Navigate:%d, Coin:%d\n",
+        button_gpio(8), button_gpio(9), button_gpio(10), button_gpio(11));
+}
+
 void handle_display(int argc, char *argv[])
 {
-    const char *usage = "Usage: display [rgb|sense|hid]\n";
+    const char *usage = "Usage: display [rgb|sense|hid|gpio]\n";
     if (argc > 1) {
         printf(usage);
         return;
@@ -73,11 +84,12 @@ void handle_display(int argc, char *argv[])
         disp_rgb();
         disp_sense();
         disp_hid();
+        disp_gpio();
         return;
     }
 
-    const char *choices[] = {"rgb", "sense", "hid"};
-    switch (cli_match_prefix(choices, 3, argv[0])) {
+    const char *choices[] = {"rgb", "sense", "hid", "gpio"};
+    switch (cli_match_prefix(choices, 4, argv[0])) {
         case 0:
             disp_rgb();
             break;
@@ -86,6 +98,9 @@ void handle_display(int argc, char *argv[])
             break;
         case 2:
             disp_hid();
+            break;
+        case 3:
+            disp_gpio();
             break;
         default:
             printf(usage);
@@ -368,10 +383,43 @@ static void handle_save()
     save_request(true);
 }
 
-static void handle_joy_reset()
+static void handle_gpio(int argc, char *argv[])
 {
-    config_factory_reset();
-    printf("Factory reset done.\n");
+    const char *usage = "Usage: gpio main <gpio1> <gpio2> ... <gpio8>\n"
+                        "   or: gpio <test|service|navigate|coin> <gpio>\n"
+                        "   gpio: 0..29\n";
+    if (argc == 9) {
+        const char *choices[] = {"main"};
+        if (cli_match_prefix(choices, 1, argv[0]) < 0) {
+            printf(usage);
+            return;
+        }
+        uint8_t gpio_main[8];
+        for (int i = 0; i < 8; i++) {
+            int gpio = cli_extract_non_neg_int(argv[i + 1], 0);
+            if (gpio > 29) {
+                printf(usage);
+                return;
+            }
+            gpio_main[i] = gpio;
+        }
+        memcpy(mai_cfg->alt.buttons, gpio_main, 8);
+    } else if (argc == 2) {
+        const char *choices[] = {"test", "service", "navigate", "coin"};
+        const uint8_t button_pos[] = {8, 9, 10, 11};
+        int match = cli_match_prefix(choices, 4, argv[0]);
+        uint8_t gpio = cli_extract_non_neg_int(argv[1], 0);
+        if ((match < 0) || (gpio > 29)) {
+            printf(usage);
+            return;
+        }
+        mai_cfg->alt.buttons[button_pos[match]] = gpio;
+    } else {
+        printf(usage);
+        return;
+    }
+    config_changed();
+    button_init(); // Re-init the buttons
 }
 
 void commands_init()
@@ -387,5 +435,6 @@ void commands_init()
     cli_register("raw", handle_raw, "Show key raw readings.");
     cli_register("whoami", handle_whoami, "Identify each com port.");
     cli_register("save", handle_save, "Save config to flash.");
+    cli_register("gpio", handle_gpio, "Set GPIO pins for buttons.");
     cli_register("factory", config_factory_reset, "Reset everything to default.");
 }
