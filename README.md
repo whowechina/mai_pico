@@ -6,6 +6,7 @@
 Features:
 * Made with a 15.6 inch portable screen.
 * Arcade-like experience.
+* Dual-player is possible.
 * All source files open.
 
 Thanks to many respectful guys/companies who made their tools or materials free or open source (KiCad, OnShape, InkScape, Raspberry things).
@@ -16,22 +17,27 @@ This project is the most complex one.
 * Heavily depends on 3D printing.
 * Requires skills to solder tiny components.
 * Requires many other DIY hands-on skills.
-* The IO PCB is still in prototype state, it works, but the layout and connectors are not perfect.
+* The IO PCB is still in prototype state, it works, but the layout and connectors are not perfect. You may need to solder directly from Pi Pico's pins. I'm just too lazy to release a new version.
 * I didn't design the housing, so it's your job to make it look nice and structually stable, follow your imagination and taste.
 
+## Check Out My Other Projects
 You can also check out my other cool projects.
 
-* Popn Pico: https://github.com/whowechina/popn_pico  
-<img src="https://raw.githubusercontent.com/whowechina/popn_pico/main/doc/main.jpg" width="180px">
+<img src="https://github.com/whowechina/popn_pico/raw/main/doc/main.jpg" height="100px">
+<img src="https://github.com/whowechina/iidx_pico/raw/main/doc/main.jpg" height="100px">
+<img src="https://github.com/whowechina/iidx_teeny/raw/main/doc/main.jpg" height="100px">
+<img src="https://github.com/whowechina/chu_pico/raw/main/doc/main.jpg" height="100px">
+<img src="https://github.com/whowechina/mai_pico/raw/main/doc/main.jpg" height="100px">
+<img src="https://github.com/whowechina/diva_pico/raw/main/doc/main.jpg" height="100px">
+<img src="https://github.com/whowechina/aic_pico/raw/main/doc/main.jpg" height="100px">
 
-* IIDX Pico: https://github.com/whowechina/iidx_pico  
-<img src="https://raw.githubusercontent.com/whowechina/iidx_pico/main/doc/main.jpg" width="220px">
-
-* IIDX Teeny: https://github.com/whowechina/iidx_teeny  
-<img src="https://raw.githubusercontent.com/whowechina/iidx_teeny/main/doc/main.jpg" width="220px">
-
-* Chu Pico: https://github.com/whowechina/chu_pico  
-<img src="https://raw.githubusercontent.com/whowechina/chu_pico/main/doc/main.jpg" width="250px">
+* Popn Pico: https://github.com/whowechina/popn_pico
+* IIDX Pico: https://github.com/whowechina/iidx_pico
+* IIDX Teeny: https://github.com/whowechina/iidx_teeny
+* Chu Pico: https://github.com/whowechina/chu_pico
+* Mai Pico: https://github.com/whowechina/mai_pico
+* Diva Pico: https://github.com/whowechina/diva_pico
+* AIC Pico: https://github.com/whowechina/aic_pico
 
 ## **Disclaimer** ##
 I made this project in my personal time with no financial benefit or sponsorship. I will continue to improve the project. I have done my best to ensure that everything is accurate and functional, there's always a chance that mistakes may occur. I cannot be held responsible for any loss of your time or money that may result from using this open source project. Thank you for your understanding.
@@ -79,7 +85,7 @@ It's CC-NC. So DIY for yourself and for your friend, don't make money from it.
     <img src="doc/assemble_1.jpg" width="60%">
   * Solder the button PCB first.  
     <img src="doc/assemble_2.jpg" width="60%">
-  * PCBs are daisy-chained using short 4-wire cable, they're LED_GND, LED, LED_5V and BUTTON_GND. So the BUTTON signal pin is not soldered yet.  
+  * PCBs are daisy-chained using short and soft 4-wire cable, they're LED_GND, LED, LED_5V and BUTTON_GND. The BUTTON signal pins are not soldered yet, you can later wire them. Don't worry about the order of button GPIOs, because they can be remapped through command line interface.    
     <img src="doc/assemble_3.jpg" width="60%">
   * You need 3M5423 UHMW film tape (or similar hard and super-smooth PTFE tape with 0.2-0.3 thickness). It is to lubricate the button surface that touches the keyswitch.  
     <img src="doc/button_lub.jpg" width="60%">
@@ -95,7 +101,7 @@ It's CC-NC. So DIY for yourself and for your friend, don't make money from it.
 
 ### Portable Display
   * Resolution: 1920*1080, size: 15.6inch, refresh rate: 120Hz (recommended) or 60Hz, built-in speakers.
-  * They're easy to find. Choose cheap or even tiny-flawed ones, they work fine.
+  * They're easy to find. Choose cheap or even tiny-flawed ones, they're much cheaper and work just fine.
   * There're 2 types of driver board, one is micro-HDMI only and the other supports type-C display (for convenient Nintendo Switch connection). They're both OK.  
   https://www.amazon.com/s?k=portable+display+15.6+120hz&s=price-asc-rank&crid=1CCA2EAYLZDBE&qid=1697276847&sprefix=portable+display+15.6+120hz%2Caps%2C387&ref=sr_st_price-asc-rank&ds=v1%3AqoS0mks05q225yuL8reh50fEEBkTZ583nMPEZJwjXAk
 
@@ -110,6 +116,7 @@ It's CC-NC. So DIY for yourself and for your friend, don't make money from it.
 ### Firmware
 * UF2 file is in `Production\Firmware` folder.
 * For the new build, hold the BOOTSEL button while connect the USB to a PC, there will be a disk named "RPI-RP2" showed up. Drag the UF2 firmware binary file into it. That's it.
+* Button GPIOs can be remapped using `gpio` command.
 * LED and Touch protocols are implemented following Sucareto's research at https://github.com/Sucareto/Mai2Touch.
 * It has a command line to do configuration. You can use this Web Serial Terminal to connect to the USB serial port of the Mai Pico. (Note: "?" is for help)  
   https://googlechromelabs.github.io/serial-terminal/  
