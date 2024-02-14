@@ -23,13 +23,7 @@ This project is the most complex one.
 ## Check Out My Other Projects
 You can also check out my other cool projects.
 
-<img src="https://github.com/whowechina/popn_pico/raw/main/doc/main.jpg" height="100px">
-<img src="https://github.com/whowechina/iidx_pico/raw/main/doc/main.jpg" height="100px">
-<img src="https://github.com/whowechina/iidx_teeny/raw/main/doc/main.jpg" height="100px">
-<img src="https://github.com/whowechina/chu_pico/raw/main/doc/main.jpg" height="100px">
-<img src="https://github.com/whowechina/mai_pico/raw/main/doc/main.jpg" height="100px">
-<img src="https://github.com/whowechina/diva_pico/raw/main/doc/main.jpg" height="100px">
-<img src="https://github.com/whowechina/aic_pico/raw/main/doc/main.jpg" height="100px">
+<img src="https://github.com/whowechina/popn_pico/raw/main/doc/main.jpg" height="100px"><img src="https://github.com/whowechina/iidx_pico/raw/main/doc/main.jpg" height="100px"><img src="https://github.com/whowechina/iidx_teeny/raw/main/doc/main.jpg" height="100px"><img src="https://github.com/whowechina/chu_pico/raw/main/doc/main.jpg" height="100px"><img src="https://github.com/whowechina/mai_pico/raw/main/doc/main.jpg" height="100px"><img src="https://github.com/whowechina/diva_pico/raw/main/doc/main.jpg" height="100px"><img src="https://github.com/whowechina/aic_pico/raw/main/doc/main.jpg" height="100px">
 
 * Popn Pico: https://github.com/whowechina/popn_pico
 * IIDX Pico: https://github.com/whowechina/iidx_pico
