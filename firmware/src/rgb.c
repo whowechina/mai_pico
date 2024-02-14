@@ -123,14 +123,18 @@ static void fade_ctrl()
 {
     static uint64_t last = 0;
     uint64_t now = time_us_64();
-    uint64_t delta = now - last;
+    uint32_t delta_ms = (now - last) / 1000;
+
+    if (delta_ms == 0) {
+        return;
+    }
 
     for (int i = 0; i < ARRAY_SIZE(rgb_ctrl); i++) {
         if (rgb_ctrl[i].duration == 0) {
             continue;
         }
 
-        rgb_ctrl[i].elapsed += delta;
+        rgb_ctrl[i].elapsed += delta_ms;
         if (rgb_ctrl[i].elapsed >= rgb_ctrl[i].duration) {
             rgb_ctrl[i].color = rgb_ctrl[i].target;
             rgb_ctrl[i].duration = 0;
