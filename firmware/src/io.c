@@ -54,7 +54,7 @@ typedef struct {
                 uint8_t len;
                 uint8_t cmd;
             } hdr;
-            led_data_t data;
+            led_data_t led;
         };
     };
     uint8_t len;
@@ -122,29 +122,30 @@ static void led_cmd(cdc_t *cdc)
     cdc->len = 0;
     ctx.last_io_time = time_us_64();
 
+    uint32_t color = rgb32(cdc->led.r, cdc->led.g, cdc->led.b, false);
+
     switch (cdc->hdr.cmd) {
         case 0x31:
             printf("8b\n");
-            uint32_t color = rgb32(cdc->data.r, cdc->data.g, cdc->data.b, false);
-            rgb_set_button_color(cdc->data.index, color);          
+            rgb_set_button(cdc->led.index, color, 0);          
             break;
         case 0x32:
             printf("8bM\n");
-            for (int i = 0; i < cdc->data.len; i++) {
-                rgb_set_button_color(i + cdc->data.start, rgb32(cdc->data.mr, cdc->data.mg, cdc->data.mb, false));
+            for (int i = 0; i < cdc->led.len; i++) {
+                rgb_set_button(i + cdc->led.start, color, 0);
             }
             break;
         case 0x33:
             printf("8bMF\n");
-            for (int i = 0; i < cdc->data.len; i++) {
-                rgb_set_button_color(i + cdc->data.start, rgb32(cdc->data.mr, cdc->data.mg, cdc->data.mb, false));
+            for (int i = 0; i < cdc->led.len; i++) {
+                rgb_set_button(i + cdc->led.start, color, cdc->led.speed);
             }
             break;
         case 0x39:
             printf("Fet\n");
-            rgb_set_cab_color(0, rgb32(cdc->data.body, cdc->data.body, cdc->data.body, false));
-            rgb_set_cab_color(1, rgb32(cdc->data.ext, cdc->data.ext, cdc->data.ext, false));
-            rgb_set_cab_color(2, rgb32(cdc->data.side, cdc->data.side, cdc->data.side, false));
+            rgb_set_cab(0, gray32(cdc->led.body, false));
+            rgb_set_cab(1, gray32(cdc->led.ext, false));
+            rgb_set_cab(2, gray32(cdc->led.side, false));
             break;
         case 0x3C:
             printf("Upd\n");

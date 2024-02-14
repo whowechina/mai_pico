@@ -22,7 +22,12 @@
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
-static uint32_t rgb_buf[20];
+static struct {
+    uint32_t color;
+    uint32_t target; // target color
+    uint16_t duration;
+    uint16_t elapsed;
+} rgb_ctrl[20];
 static const uint8_t button_led_map[] = RGB_BUTTON_MAP;
 
 #define _MAP_LED(x) _MAKE_MAPPER(x)
@@ -51,6 +56,11 @@ uint32_t rgb32(uint32_t r, uint32_t g, uint32_t b, bool gamma_fix)
 #else
     return _rgb32(r, g, b, gamma_fix);
 #endif
+}
+
+uint32_t gray32(uint32_t c, bool gamma_fix)
+{
+    return rgb32(c, c, c, gamma_fix);
 }
 
 uint32_t rgb32_from_hsv(uint8_t h, uint8_t s, uint8_t v)
@@ -84,6 +94,14 @@ uint32_t rgb32_from_hsv(uint8_t h, uint8_t s, uint8_t v)
     }
 }
 
+static uint32_t lerp(uint32_t a, uint32_t b, uint8_t t)
+{
+    uint32_t c1 = ((a & 0xff0000) * (255 - t) + (b & 0xff0000) * t) & 0xff000000;
+    uint32_t c2 = ((a & 0xff00) * (255 - t) + (b & 0xff00) * t) & 0xff0000;
+    uint32_t c3 = ((a & 0xff) * (255 - t) + (b & 0xff) * t) & 0xff00;
+    return c1 | c2 | c3;
+}
+
 static void drive_led()
 {
     static uint64_t last = 0;
@@ -93,23 +111,37 @@ static void drive_led()
     }
     last = now;
 
-    for (int i = 0; i < ARRAY_SIZE(rgb_buf); i++) {
+    for (int i = 0; i < ARRAY_SIZE(rgb_ctrl); i++) {
         int num = (i < 8) ? mai_cfg->rgb.per_button : mai_cfg->rgb.per_aux;
         for (int j = 0; j < num; j++) {
-            pio_sm_put_blocking(pio0, 0, rgb_buf[i] << 8u);
+            pio_sm_put_blocking(pio0, 0, rgb_ctrl[i].color << 8u);
         }
     }
 }
 
-void rgb_set_colors(const uint32_t *colors, unsigned index, size_t num)
+static void fade_ctrl()
 {
-    if (index >= ARRAY_SIZE(rgb_buf)) {
-        return;
+    static uint64_t last = 0;
+    uint64_t now = time_us_64();
+    uint64_t delta = now - last;
+
+    for (int i = 0; i < ARRAY_SIZE(rgb_ctrl); i++) {
+        if (rgb_ctrl[i].duration == 0) {
+            continue;
+        }
+
+        rgb_ctrl[i].elapsed += delta;
+        if (rgb_ctrl[i].elapsed >= rgb_ctrl[i].duration) {
+            rgb_ctrl[i].color = rgb_ctrl[i].target;
+            rgb_ctrl[i].duration = 0;
+            continue;
+        }
+
+        uint8_t progress = rgb_ctrl[i].elapsed * 255 / rgb_ctrl[i].duration;
+        rgb_ctrl->color = lerp(rgb_ctrl->color, rgb_ctrl->target, progress);
     }
-    if (index + num > ARRAY_SIZE(rgb_buf)) {
-        num = ARRAY_SIZE(rgb_buf) - index;
-    }
-    memcpy(&rgb_buf[index], colors, num * sizeof(*colors));
+
+    last = now;
 }
 
 static inline uint32_t apply_level(uint32_t color)
@@ -125,20 +157,36 @@ static inline uint32_t apply_level(uint32_t color)
     return r << 16 | g << 8 | b;
 }
 
-void rgb_set_button_color(unsigned index, uint32_t color)
+static void set_color(unsigned index, uint32_t color, uint8_t speed)
 {
-    if (index >= 8) {
+    if (index >= ARRAY_SIZE(rgb_ctrl)) {
         return;
     }
-    rgb_buf[button_led_map[index]] = apply_level(color);
+
+    if (speed > 0) {
+        rgb_ctrl[index].target = apply_level(color);
+        rgb_ctrl[index].duration = 32767 / speed;
+        rgb_ctrl[index].elapsed = 0;
+    } else {
+        rgb_ctrl[index].color = apply_level(color);
+        rgb_ctrl[index].duration = 0;
+    }
 }
 
-void rgb_set_cab_color(unsigned index, uint32_t color)
+void rgb_set_button(unsigned index, uint32_t color, uint8_t speed)
 {
-    if (index >= 0) {
+    if (index >= ARRAY_SIZE(button_led_map)) {
         return;
     }
-    rgb_buf[8 + index] = apply_level(color);
+    set_color(button_led_map[index], color, speed);
+}
+
+void rgb_set_cab(unsigned index, uint32_t color)
+{
+    if (index >= 3) {
+        return;
+    }
+    set_color(8 + index, color, 0);
 }
 
 void rgb_init()
@@ -151,5 +199,6 @@ void rgb_init()
 
 void rgb_update()
 {
+    fade_ctrl();
     drive_led();
 }

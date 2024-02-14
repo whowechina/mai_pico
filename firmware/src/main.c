@@ -47,7 +47,7 @@ static void run_lights()
         if (buttons & (1 << i)) {
             color = mai_cfg->color.key_on;
         }
-        rgb_set_button_color(i, color);
+        rgb_set_button(i, color, 0);
     }
 }
 
