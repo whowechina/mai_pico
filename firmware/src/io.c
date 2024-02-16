@@ -126,35 +126,35 @@ static void led_cmd(cdc_t *cdc)
 
     switch (cdc->hdr.cmd) {
         case 0x31:
-            printf("8b\n");
+            //printf("C %d:1: %02x%02x%02x\n", cdc->led.index, cdc->led.r, cdc->led.g, cdc->led.b);
             rgb_set_button(cdc->led.index, color, 0);          
             break;
         case 0x32:
-            printf("8bM\n");
+            //printf("C %d:%d: %02x%02x%02x\n", cdc->led.start, cdc->led.len, cdc->led.r, cdc->led.g, cdc->led.b);
             for (int i = 0; i < cdc->led.len; i++) {
                 rgb_set_button(i + cdc->led.start, color, 0);
             }
             break;
         case 0x33:
-            printf("8bMF\n");
+            //printf("F %d:%d: %02x%02x%02x %d\n", cdc->led.start, cdc->led.len, cdc->led.r, cdc->led.g, cdc->led.b, cdc->led.speed);
             for (int i = 0; i < cdc->led.len; i++) {
                 rgb_set_button(i + cdc->led.start, color, cdc->led.speed);
             }
             break;
         case 0x39:
-            printf("Fet\n");
+            //printf("Fet\n");
             rgb_set_cab(0, gray32(cdc->led.body, false));
             rgb_set_cab(1, gray32(cdc->led.ext, false));
             rgb_set_cab(2, gray32(cdc->led.side, false));
             break;
         case 0x3C:
-            printf("Upd\n");
+            //printf("Upd\n");
             break;
         case 0x82:
-            printf("Dir\n");
+            //printf("Dir\n");
             break;
         default:
-            printf("LEDUnk\n");
+            printf("Unknown LED Cmd %02x\n", cdc->hdr.cmd);
             return;
     }
 }

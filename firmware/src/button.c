@@ -47,12 +47,20 @@ uint8_t button_num()
     return BUTTON_NUM;
 }
 
-uint8_t button_gpio(int id)
+uint8_t button_real_gpio(int id)
 {
     if (id >= BUTTON_NUM) {
         return 0xff;
     }
     return gpio_real[id];
+}
+
+uint8_t button_default_gpio(int id)
+{
+    if (id >= BUTTON_NUM) {
+        return 0xff;
+    }
+    return gpio_def[id];
 }
 
 static uint16_t button_reading;

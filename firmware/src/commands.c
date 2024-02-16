@@ -66,10 +66,11 @@ static void disp_gpio()
     printf("[GPIO]\n");
     printf("  Main buttons:");
     for (int i = 0; i < 8; i++) {
-        printf(" %d:%d", i + 1, button_gpio(i));
+        printf(" %d:%d", i + 1, button_real_gpio(i));
     }
     printf("\n  Test:%d, Service:%d, Navigate:%d, Coin:%d\n",
-        button_gpio(8), button_gpio(9), button_gpio(10), button_gpio(11));
+        button_real_gpio(8), button_real_gpio(9),
+        button_real_gpio(10), button_real_gpio(11));
 }
 
 void handle_display(int argc, char *argv[])
@@ -386,9 +387,18 @@ static void handle_save()
 static void handle_gpio(int argc, char *argv[])
 {
     const char *usage = "Usage: gpio main <gpio1> <gpio2> ... <gpio8>\n"
-                        "   or: gpio <test|service|navigate|coin> <gpio>\n"
-                        "   gpio: 0..29\n";
-    if (argc == 9) {
+                        "       gpio <test|service|navigate|coin> <gpio>\n"
+                        "       gpio reset\n"
+                        "  gpio: 0..29\n";
+    if (argc == 1) {
+        if (strcasecmp(argv[0], "reset") != 0) {
+            printf(usage);
+            return;
+        }
+        for (int i = 0; i < sizeof(mai_cfg->alt.buttons); i++) {
+            mai_cfg->alt.buttons[i] = 0xff;
+        }
+    } else if (argc == 9) {
         const char *choices[] = {"main"};
         if (cli_match_prefix(choices, 1, argv[0]) < 0) {
             printf(usage);
@@ -403,7 +413,11 @@ static void handle_gpio(int argc, char *argv[])
             }
             gpio_main[i] = gpio;
         }
-        memcpy(mai_cfg->alt.buttons, gpio_main, 8);
+        for (int i = 0; i < 8; i++) {
+            int gpio = gpio_main[i];
+            bool is_default = (gpio == button_default_gpio(i));
+            mai_cfg->alt.buttons[i] = is_default ? 0xff : gpio;
+        }
     } else if (argc == 2) {
         const char *choices[] = {"test", "service", "navigate", "coin"};
         const uint8_t button_pos[] = {8, 9, 10, 11};
@@ -413,13 +427,16 @@ static void handle_gpio(int argc, char *argv[])
             printf(usage);
             return;
         }
-        mai_cfg->alt.buttons[button_pos[match]] = gpio;
+        int index = button_pos[match];
+        bool is_default = (gpio == button_default_gpio(index));
+        mai_cfg->alt.buttons[index] = is_default ? 0xff : gpio;
     } else {
         printf(usage);
         return;
     }
     config_changed();
     button_init(); // Re-init the buttons
+    disp_gpio();
 }
 
 void commands_init()

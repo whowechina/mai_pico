@@ -22,12 +22,13 @@
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
+uint32_t rgb_buf[20];
 static struct {
-    uint32_t color;
+    uint32_t color; // current color
     uint32_t target; // target color
     uint16_t duration;
     uint16_t elapsed;
-} rgb_ctrl[20];
+} fade_ctx[20];
 static const uint8_t button_led_map[] = RGB_BUTTON_MAP;
 
 #define _MAP_LED(x) _MAKE_MAPPER(x)
@@ -111,10 +112,10 @@ static void drive_led()
     }
     last = now;
 
-    for (int i = 0; i < ARRAY_SIZE(rgb_ctrl); i++) {
+    for (int i = 0; i < ARRAY_SIZE(rgb_buf); i++) {
         int num = (i < 8) ? mai_cfg->rgb.per_button : mai_cfg->rgb.per_aux;
         for (int j = 0; j < num; j++) {
-            pio_sm_put_blocking(pio0, 0, rgb_ctrl[i].color << 8u);
+            pio_sm_put_blocking(pio0, 0, rgb_buf[i] << 8u);
         }
     }
 }
@@ -125,24 +126,24 @@ static void fade_ctrl()
     uint64_t now = time_us_64();
     uint32_t delta_ms = (now - last) / 1000;
 
-    if (delta_ms == 0) {
+    if (delta_ms < 4) { // no faster than 250Hz
         return;
     }
 
-    for (int i = 0; i < ARRAY_SIZE(rgb_ctrl); i++) {
-        if (rgb_ctrl[i].duration == 0) {
+    for (int i = 0; i < ARRAY_SIZE(fade_ctx); i++) {
+        if (fade_ctx[i].duration == 0) {
             continue;
         }
 
-        rgb_ctrl[i].elapsed += delta_ms;
-        if (rgb_ctrl[i].elapsed >= rgb_ctrl[i].duration) {
-            rgb_ctrl[i].color = rgb_ctrl[i].target;
-            rgb_ctrl[i].duration = 0;
+        fade_ctx[i].elapsed += delta_ms;
+        if (fade_ctx[i].elapsed >= fade_ctx[i].duration) {
+            fade_ctx[i].duration = 0;
+            rgb_buf[i] = fade_ctx[i].target;
             continue;
         }
 
-        uint8_t progress = rgb_ctrl[i].elapsed * 255 / rgb_ctrl[i].duration;
-        rgb_ctrl->color = lerp(rgb_ctrl->color, rgb_ctrl->target, progress);
+        uint8_t progress = fade_ctx[i].elapsed * 255 / fade_ctx[i].duration;
+        rgb_buf[i] = lerp(fade_ctx->color, fade_ctx->target, progress);
     }
 
     last = now;
@@ -163,17 +164,18 @@ static inline uint32_t apply_level(uint32_t color)
 
 static void set_color(unsigned index, uint32_t color, uint8_t speed)
 {
-    if (index >= ARRAY_SIZE(rgb_ctrl)) {
+    if (index >= ARRAY_SIZE(fade_ctx)) {
         return;
     }
 
     if (speed > 0) {
-        rgb_ctrl[index].target = apply_level(color);
-        rgb_ctrl[index].duration = 32767 / speed;
-        rgb_ctrl[index].elapsed = 0;
+        fade_ctx[index].color= rgb_buf[index];
+        fade_ctx[index].target = apply_level(color);
+        fade_ctx[index].duration = 32767 / speed;
+        fade_ctx[index].elapsed = 0;
     } else {
-        rgb_ctrl[index].color = apply_level(color);
-        rgb_ctrl[index].duration = 0;
+        rgb_buf[index] = apply_level(color);
+        fade_ctx[index].duration = 0;
     }
 }
 

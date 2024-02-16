@@ -11,7 +11,7 @@
 #include "save.h"
 
 #define MAX_COMMANDS 32
-#define MAX_PARAMETERS 6
+#define MAX_PARAMETERS 10
 #define MAX_PARAMETER_LENGTH 20
 
 const char *cli_prompt = "cli>";
