@@ -65,7 +65,7 @@ void button_update()
     uint16_t buttons = 0;
 
     for (int i = BUTTON_NUM - 1; i >= 0; i--) {
-        bool sw_pressed = !gpio_real[i];
+        bool sw_pressed = !gpio_get(gpio_real[i]);
         
         if (now >= sw_freeze_time[i]) {
             if (sw_pressed != sw_val[i]) {
