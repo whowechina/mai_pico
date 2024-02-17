@@ -95,12 +95,17 @@ uint32_t rgb32_from_hsv(uint8_t h, uint8_t s, uint8_t v)
     }
 }
 
+static inline uint8_t lerp8b(uint8_t a, uint8_t b, uint8_t t)
+{
+    return a + (b - a) * t / 255;
+}
+
 static uint32_t lerp(uint32_t a, uint32_t b, uint8_t t)
 {
-    uint32_t c1 = ((a & 0xff0000) * (255 - t) + (b & 0xff0000) * t) & 0xff000000;
-    uint32_t c2 = ((a & 0xff00) * (255 - t) + (b & 0xff00) * t) & 0xff0000;
-    uint32_t c3 = ((a & 0xff) * (255 - t) + (b & 0xff) * t) & 0xff00;
-    return c1 | c2 | c3;
+    uint32_t c1 = lerp8b((a >> 16) & 0xff, (b >> 16) & 0xff, t);
+    uint32_t c2 = lerp8b((a >> 8) & 0xff, (b >> 8) & 0xff, t);
+    uint32_t c3 = lerp8b(a & 0xff, b & 0xff, t);
+    return c1 << 16 | c2 << 8 | c3;
 }
 
 static void drive_led()
@@ -118,6 +123,19 @@ static void drive_led()
             pio_sm_put_blocking(pio0, 0, rgb_buf[i] << 8u);
         }
     }
+}
+
+static inline uint32_t apply_level(uint32_t color)
+{
+    unsigned r = (color >> 16) & 0xff;
+    unsigned g = (color >> 8) & 0xff;
+    unsigned b = color & 0xff;
+
+    r = r * mai_cfg->color.level / 255;
+    g = g * mai_cfg->color.level / 255;
+    b = b * mai_cfg->color.level / 255;
+
+    return r << 16 | g << 8 | b;
 }
 
 static void fade_ctrl()
@@ -143,23 +161,11 @@ static void fade_ctrl()
         }
 
         uint8_t progress = fade_ctx[i].elapsed * 255 / fade_ctx[i].duration;
-        rgb_buf[i] = lerp(fade_ctx->color, fade_ctx->target, progress);
+        uint32_t color = lerp(fade_ctx[i].color, fade_ctx[i].target, progress);
+        rgb_buf[i] = apply_level(color);
     }
 
     last = now;
-}
-
-static inline uint32_t apply_level(uint32_t color)
-{
-    unsigned r = (color >> 16) & 0xff;
-    unsigned g = (color >> 8) & 0xff;
-    unsigned b = color & 0xff;
-
-    r = r * mai_cfg->color.level / 255;
-    g = g * mai_cfg->color.level / 255;
-    b = b * mai_cfg->color.level / 255;
-
-    return r << 16 | g << 8 | b;
 }
 
 static void set_color(unsigned index, uint32_t color, uint8_t speed)
@@ -169,13 +175,13 @@ static void set_color(unsigned index, uint32_t color, uint8_t speed)
     }
 
     if (speed > 0) {
-        fade_ctx[index].color= rgb_buf[index];
-        fade_ctx[index].target = apply_level(color);
-        fade_ctx[index].duration = 32767 / speed;
+        fade_ctx[index].target = color;
+        fade_ctx[index].duration = 4095 / speed * 8;
         fade_ctx[index].elapsed = 0;
     } else {
-        rgb_buf[index] = apply_level(color);
+        fade_ctx[index].color= color;
         fade_ctx[index].duration = 0;
+        rgb_buf[index] = apply_level(color);
     }
 }
 

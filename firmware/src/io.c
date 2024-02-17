@@ -122,21 +122,32 @@ static void led_cmd(cdc_t *cdc)
     cdc->len = 0;
     ctx.last_io_time = time_us_64();
 
-    uint32_t color = rgb32(cdc->led.r, cdc->led.g, cdc->led.b, false);
-
+    uint32_t now = (ctx.last_io_time / 1000) % 10000;
+    uint32_t color;
     switch (cdc->hdr.cmd) {
+        case 0x10:
+            for (int i = 0; i < 8; i++) {
+                rgb_set_button(i, 0, 0);
+            }
+            for (int i = 0; i < 3; i++) {
+                rgb_set_cab(i, 0);
+            }
+            break;
         case 0x31:
-            //printf("C %d:1: %02x%02x%02x\n", cdc->led.index, cdc->led.r, cdc->led.g, cdc->led.b);
+            color = rgb32(cdc->led.r, cdc->led.g, cdc->led.b, false);
+            //printf("%4d:c %d:1: %06x\n", now, cdc->led.index, color);
             rgb_set_button(cdc->led.index, color, 0);          
             break;
         case 0x32:
-            //printf("C %d:%d: %02x%02x%02x\n", cdc->led.start, cdc->led.len, cdc->led.r, cdc->led.g, cdc->led.b);
+            color = rgb32(cdc->led.mr, cdc->led.mg, cdc->led.mb, false);
+            //printf("%4d:C %d:%d: %06x\n", now, cdc->led.start, cdc->led.len, color, cdc->led.mb);
             for (int i = 0; i < cdc->led.len; i++) {
                 rgb_set_button(i + cdc->led.start, color, 0);
             }
             break;
         case 0x33:
-            //printf("F %d:%d: %02x%02x%02x %d\n", cdc->led.start, cdc->led.len, cdc->led.r, cdc->led.g, cdc->led.b, cdc->led.speed);
+            color = rgb32(cdc->led.mr, cdc->led.mg, cdc->led.mb, false);
+            //printf("%4d:F %d:%d: %06x %d\n", now, cdc->led.start, cdc->led.len, color, cdc->led.speed);
             for (int i = 0; i < cdc->led.len; i++) {
                 rgb_set_button(i + cdc->led.start, color, cdc->led.speed);
             }
