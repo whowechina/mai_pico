@@ -65,7 +65,7 @@ static void gen_nkro_report()
 
     uint16_t buttons = button_read();
     const char *keymap = (mai_cfg->hid.nkro == 2) ? keymap_p2 : keymap_p1;
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < button_num(); i++) {
         uint8_t code = keymap[i];
         uint8_t byte = code / 8;
         uint8_t bit = code % 8;
