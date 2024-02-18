@@ -110,13 +110,19 @@ It's CC-NC. So DIY for yourself and for your friend, don't make money from it.
 ### Firmware
 * UF2 file is in `Production\Firmware` folder.
 * For the new build, hold the BOOTSEL button while connect the USB to a PC, there will be a disk named "RPI-RP2" showed up. Drag the UF2 firmware binary file into it. That's it.
-* Button GPIOs can be remapped using `gpio` command.
 * LED and Touch protocols are implemented following Sucareto's research at https://github.com/Sucareto/Mai2Touch.
 * It has a command line to do configuration. You can use this Web Serial Terminal to connect to the USB serial port of the Mai Pico. (Note: "?" is for help)  
   https://googlechromelabs.github.io/serial-terminal/  
   <img src="doc/cmd.png" width="80%">
-* It implements 3 COM ports, one is for command line and the other two are for LED and Touch. By issuing "whoami" to the command line, each COM port will print their identities.
-* Button signal is sent to the host by HID Joystick or HID NKRO (keyboard). There're two set of NKRO keymaps, use `hid <joy|key1|key2>` to switch between them.
+* Button GPIOs can be remapped using `gpio` command.
+* Daisy chained RGB LED numbers for each button can be assigned using `rgb` command.
+* LED brightness can be adjusted by `level` command.
+* There are MPR121 parameter tuning and sensitive settings, explore them yourself.
+* It implements 3 COM ports, one is for command line and the other two are for LED and Touch. By issuing `whoami` to the command line, each COM port will print their identities.
+* Button signal is sent to the host by HID Joystick or HID NKRO (keyboard). There're two set of NKRO keymaps, use `hid <joy|key1|key2>` to switch between them. In NKRO mode, key mappings are:
+  * key1: `WEDCXZAQ`-Ring Buttons, `3`-Select
+  * key2 (Numpad): `89632147`-Ring Buttons, `*`-Select
+  * Above two sets both have: `F1`-Test `F2`-Service `F3`-Coin
 
 ## CAD Source File
 I'm using OnShape free subscription. It's powerful but it can't archive original designs to local, so I can only share the link here. STL/DXF/DWG files are exported from this online document.  
