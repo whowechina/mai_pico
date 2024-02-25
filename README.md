@@ -3,16 +3,18 @@
 <img src="doc/main.jpg" width="80%">  
 <img src="doc/assembled.jpg" width="80%">
 
-Features:
+[看不懂英文的，这里是中文版指南](README_CN.md)
+
+**Features:**
 * Made with a 15.6 inch portable screen.
 * Arcade-like experience.
 * Dual-player is possible.
 * All source files open.
 
-Thanks to many respectful guys/companies who made their tools or materials free or open source (KiCad, OnShape, InkScape, Raspberry things).
+Thanks to many respectful guys/companies who made their tools or materials free or open source (KiCad, OnShape, InkScape, Raspberry things, JLCPCB).
 
 ## Notes
-This project is the most complex one.
+This project is the most complex one among all my projects.
 * It needs a custom etched ITO glass and a portable display.
 * Heavily depends on 3D printing.
 * Requires skills to solder tiny components.
@@ -48,12 +50,12 @@ It's CC-NC. So DIY for yourself and for your friend, don't make money from it.
   Becareful of 3 pins that are at the other side, they're difficult to solder and may leave air bubbles.  
   <img src="doc/solder_usb_txrx.jpg" width="60%">
 * 1x USB Type-C socket (918-418K2023S40001 or KH-TYPE-C-16P)
+* 2x 0603 5.1kohm resistors (R20, R21) for USB. If you plan to use the native USB socket on the Pi Pico directly, then the Type-C socket and resistors can be omitted, making the soldering much simpler.
 * 3x MPR121 modules, there're many types in the market, choose ones like this.  
   https://www.sparkfun.com/products/retired/9695  
   Before solder MP121 module to the main PCB board, remember to **cut (unshort) the ADDR pin** which is short by default.  
   <img src="doc/mpr121_cut.png" width="40%">
 * Leave U5, U6, U7 area discrete components empty as we're using MPR121 module, not the chip.
-* 2x 0603 5.1kohm resistors (R20, R21) for USB.
 * 1x SN74LV1T34DBVR (SOT-23-5) level shifter (U8), if you can't find one, use a 0603 10ohm resistor (R4) as an alternative.  
   https://www.lcsc.com/product-detail/Buffer-Driver-Transceiver_Texas-Instruments-SN74LV1T34DBVR_C100024.html
 * 4x 0603 1uF (0.1~1uF all fine) capacitors (C1, C2, C3, C7), OPTIONAL, recommended.
