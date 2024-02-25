@@ -103,7 +103,7 @@ enum {
                                                                                \
         HID_USAGE_PAGE_N(0xffa0, 2),                                           \
         HID_USAGE(0x00),                                                       \
-        HID_REPORT_ID(REPORT_ID_OUTPUT)                                                    \
+        HID_REPORT_ID(REPORT_ID_OUTPUT)                                        \
         HID_COLLECTION(HID_COLLECTION_APPLICATION),                            \
             HID_USAGE(0x00),                                                   \
             HID_LOGICAL_MIN(0), HID_LOGICAL_MAX(255),                          \
