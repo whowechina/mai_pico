@@ -1,9 +1,8 @@
 # Mai Pico - Maimai Style Mini Controller
+[看不懂英文的，点这里切换到中文版](README_CN.md)
 
 <img src="doc/main.jpg" width="80%">  
 <img src="doc/assembled.jpg" width="80%">
-
-[看不懂英文的，这里是中文版指南](README_CN.md)
 
 **Features:**
 * Made with a 15.6 inch portable screen.

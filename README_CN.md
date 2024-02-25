@@ -1,9 +1,9 @@
 # Mai Pico - Maimai 风格的迷你控制器
 
+[Click here for the English version of this guide.](README.md)
+
 <img src="doc/main.jpg" width="80%">  
 <img src="doc/assembled.jpg" width="80%">
-
-[Here's the English version of this guide.](README.md)
 
 为了省事，本文档是我从原先英文版翻译回中文的，高度依赖了 GitHub Copilot (GPT)，所以语气可能怪怪的，见谅。
 
