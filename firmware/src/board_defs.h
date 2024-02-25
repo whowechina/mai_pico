@@ -14,6 +14,7 @@
 #define RGB_ORDER GRB // or RGB
 #define RGB_BUTTON_MAP { 5, 4, 3, 2, 1, 0, 7, 6, 8, 9, 10, 11 }
 
+/* 8 main buttons, Test, Service, Navigate, Coin */
 #define BUTTON_DEF { 1, 0, 4, 5, 8, 9, 3, 2, 12, 11, 10, 14 }
 
 /* HID Keycode: https://github.com/hathach/tinyusb/blob/master/src/class/hid/hid.h */

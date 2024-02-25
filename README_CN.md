@@ -124,7 +124,7 @@ https://github.com/whowechina/
 * 它有一个命令行进行配置。你可以使用这个 Web Serial Terminal 连接到 Mai Pico 的 USB 串口。（注意："?" 是帮助）  
   https://googlechromelabs.github.io/serial-terminal/  
   <img src="doc/cmd.png" width="80%">
-* 可以使用 `gpio` 命令重新映射按钮 GPIOs。
+* 可以使用 `gpio` 命令重新映射按钮 GPIOs，固件支持 8 个主按钮和 4 个辅助按钮（分别是：Test, Service, Navigate, Coin）。
 * 可以使用 `rgb` 命令为每个按钮分配串联的 RGB LED 数量。
 * 可以通过 `level` 命令调整 LED 的亮度。
 * 有 MPR121 参数调整和灵敏度设置，自己探索。

@@ -7,5 +7,6 @@
 #define HID_H_
 
 void hid_update();
+void hid_proc(const uint8_t *data, uint8_t len);
 
 #endif

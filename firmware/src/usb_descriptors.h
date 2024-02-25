@@ -6,6 +6,7 @@
 
 enum {
     REPORT_ID_JOYSTICK = 1,
+    REPORT_ID_OUTPUT = 16,
 };
 
 // because they are missing from tusb_hid.h
@@ -99,6 +100,16 @@ enum {
                                                                                \
         HID_REPORT_COUNT(1), HID_REPORT_SIZE(232),                             \
         HID_INPUT(HID_CONSTANT | HID_ABSOLUTE),                                \
+                                                                               \
+        HID_USAGE_PAGE_N(0xffa0, 2),                                           \
+        HID_USAGE(0x00),                                                       \
+        HID_REPORT_ID(REPORT_ID_OUTPUT)                                                    \
+        HID_COLLECTION(HID_COLLECTION_APPLICATION),                            \
+            HID_USAGE(0x00),                                                   \
+            HID_LOGICAL_MIN(0), HID_LOGICAL_MAX(255),                          \
+            HID_REPORT_COUNT(63), HID_REPORT_SIZE(8),                          \
+            HID_OUTPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE),                \
+        HID_COLLECTION_END,                                                    \
     HID_COLLECTION_END
 
 #define MAIPICO_REPORT_DESC_NKRO                                               \

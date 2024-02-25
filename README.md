@@ -116,7 +116,7 @@ It's CC-NC. So DIY for yourself and for your friend, don't make money from it.
 * It has a command line to do configuration. You can use this Web Serial Terminal to connect to the USB serial port of the Mai Pico. (Note: "?" is for help)  
   https://googlechromelabs.github.io/serial-terminal/  
   <img src="doc/cmd.png" width="80%">
-* Button GPIOs can be remapped using `gpio` command.
+* Button GPIOs can be remapped using `gpio` command. Firmware supports 8 main buttons on the ring and 4 auxiliary buttons (Test, Service, Navigate and Coin). 
 * Daisy chained RGB LED numbers for each button can be assigned using `rgb` command.
 * LED brightness can be adjusted by `level` command.
 * There are MPR121 parameter tuning and sensitive settings, explore them yourself.

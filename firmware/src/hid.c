@@ -43,10 +43,18 @@ static void report_usb_hid()
 {
     if (tud_hid_ready()) {
         if (mai_cfg->hid.joy) {
+            static uint16_t last_buttons = 0;
             uint16_t buttons = button_read();
             hid_joy.buttons[0] = native_to_io4(buttons);
             hid_joy.buttons[1] = native_to_io4(0);
+            if (last_buttons ^ buttons & (1 << 11)) {
+                if ((buttons & (1 << 11)) && (hid_joy.chutes[0] < 0xff00)) {
+                   // just pressed coin button
+                   hid_joy.chutes[0] += 0x100;
+                }
+            }
             tud_hid_n_report(0, REPORT_ID_JOYSTICK, &hid_joy, sizeof(hid_joy));
+            last_buttons = buttons;
         }
         if (mai_cfg->hid.nkro) {
             tud_hid_n_report(1, 0, &hid_nkro, sizeof(hid_nkro));
@@ -81,4 +89,34 @@ void hid_update()
 {
     gen_nkro_report();
     report_usb_hid();
+}
+
+typedef struct __attribute__((packed)) {
+    uint8_t report_id;
+    uint8_t cmd;
+    uint8_t payload[62];
+} hid_output_t;
+
+void hid_proc(const uint8_t *data, uint8_t len)
+{
+    hid_output_t *output = (hid_output_t *)data;
+    if (output->report_id == REPORT_ID_OUTPUT) {
+        switch (output->cmd) {
+            case 0x01: // Set Timeout
+            case 0x02: // Set Sampling Count
+                hid_joy.system_status = 0x30;
+                break;
+            case 0x03: // Clear Board Status
+                hid_joy.chutes[0] = 0;
+                hid_joy.chutes[1] = 0;
+                hid_joy.system_status = 0x00;
+                break;
+            case 0x04: // Set General Output
+            case 0x41: // I don't know what this is
+                break;
+            default:
+                printf("USB unknown cmd: %d\n", output->cmd);
+                break;
+        }
+    }
 }

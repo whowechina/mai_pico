@@ -89,9 +89,13 @@ enum { ITF_NUM_JOY, ITF_NUM_NKRO,
        ITF_NUM_CDC_LED, ITF_NUM_CDC_LED_DATA,
        ITF_NUM_TOTAL };
 
-#define CONFIG_TOTAL_LEN (TUD_CONFIG_DESC_LEN + TUD_HID_DESC_LEN * 2 + TUD_CDC_DESC_LEN * 3)
+#define CONFIG_TOTAL_LEN (TUD_CONFIG_DESC_LEN +         \
+                          TUD_HID_INOUT_DESC_LEN * 1 +  \
+                          TUD_HID_DESC_LEN * 1 +        \
+                          TUD_CDC_DESC_LEN * 3)
 
 #define EPNUM_JOY 0x81
+#define EPNUM_OUTPUT 0x01
 #define EPNUM_KEY 0x82
 
 #define EPNUM_CDC_CLI_NOTIF 0x83
@@ -114,8 +118,8 @@ uint8_t const desc_configuration_joy[] = {
 
     // Interface number, string index, protocol, report descriptor len, EP In
     // address, size & polling interval
-    TUD_HID_DESCRIPTOR(ITF_NUM_JOY, 4, HID_ITF_PROTOCOL_NONE,
-                       sizeof(desc_hid_report_joy), EPNUM_JOY,
+    TUD_HID_INOUT_DESCRIPTOR(ITF_NUM_JOY, 4, HID_ITF_PROTOCOL_NONE,
+                       sizeof(desc_hid_report_joy), EPNUM_OUTPUT, EPNUM_JOY,
                        CFG_TUD_HID_EP_BUFSIZE, 1),
 
     TUD_HID_DESCRIPTOR(ITF_NUM_NKRO, 5, HID_ITF_PROTOCOL_NONE,
