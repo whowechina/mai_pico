@@ -1,5 +1,5 @@
 # Mai Pico - Maimai Style Mini Controller
-[看不懂英文的，点这里切换到中文版](README_CN.md)
+[点这里可以切换到中文版](README_CN.md)
 
 <img src="doc/main.jpg" width="80%">  
 <img src="doc/assembled.jpg" width="80%">
