@@ -61,7 +61,7 @@ https://github.com/whowechina/
 * 3x MPR121 模块，市场上有许多类型，选择像这样的。
   https://www.sparkfun.com/products/retired/9695 
 
-  在将 MP121 模块焊接到主 PCB 板之前，记住**切断（断开）默认短接的 ADDR 引脚**，也要注意不要切过红线之外的区域。  
+  在将 MP121 模块焊接到主 PCB 板之前，记得用小刀**切断 ADDR 和 GND 之间的微小连线**，注意绝对不要切过头。  
   <img src="doc/mpr121_cut.png" width="40%">
 * 因为我们使用的是 MPR121 模块，而不是芯片，所以 U5、U6、U7 区域的离散组件留空。
 * 1x SN74LV1T34DBVR（SOT-23-5）电平转换器（U8），如果你找不到，可以用 0603 10ohm 电阻（R4）替代。

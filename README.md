@@ -52,7 +52,7 @@ It's CC-NC. So DIY for yourself and for your friend, don't make money from it.
 * 2x 0603 5.1kohm resistors (R20, R21) for USB. If you plan to use the native USB socket on the Pi Pico directly, then the Type-C socket and resistors can be omitted, making the soldering much simpler.
 * 3x MPR121 modules, there're many types in the market, choose ones like this.  
   https://www.sparkfun.com/products/retired/9695  
-  Before solder MP121 module to the main PCB board, remember to **cut (unshort) the ADDR pin** which is short by default.  
+  Before solder MP121 module to the main PCB board, remember to use a knife to **cut (unshort) the tiny trace that connects ADDR to the GND**. Please be careful not to cut more than necessary.  
   <img src="doc/mpr121_cut.png" width="40%">
 * Leave U5, U6, U7 area discrete components empty as we're using MPR121 module, not the chip.
 * 1x SN74LV1T34DBVR (SOT-23-5) level shifter (U8), if you can't find one, use a 0603 10ohm resistor (R4) as an alternative.  
