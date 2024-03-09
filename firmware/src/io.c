@@ -36,8 +36,30 @@ typedef union {
         uint8_t mb;
         uint8_t speed;                    
     };
+    struct {
+        uint8_t addr;
+        uint8_t data;
+    } eeprom;
     uint8_t rgb[11][3];
 } led_data_t;
+
+typedef union {
+    uint8_t raw[32];
+    struct {
+        struct {
+            uint8_t dst;
+            uint8_t src;
+            uint8_t len;
+            uint8_t status;
+            uint8_t cmd;
+            uint8_t report;
+        } hdr;
+        uint8_t payload[0];
+    };
+} led_resp_t;
+
+#define SYNC 0xE0
+#define ESCAPE 0xD0
 
 typedef struct {
     int interface;
@@ -115,6 +137,79 @@ static void touch_cmd(cdc_t *cdc)
     }
 }
 
+static void led_write(cdc_t *cdc, led_resp_t *resp)
+{
+    tud_cdc_n_write_char(cdc->interface, SYNC); // SYNC
+
+    uint8_t checksum = 0;
+    for (int i = 0; i < resp->hdr.len + 3; i++) {
+        uint8_t c = resp->raw[i];
+        checksum += c;
+        if (c == SYNC || c == ESCAPE) {
+            tud_cdc_n_write_char(cdc->interface, ESCAPE);
+            tud_cdc_n_write_char(cdc->interface, c - 1);
+        } else {
+            tud_cdc_n_write_char(cdc->interface, c);
+        }
+    }
+    tud_cdc_n_write_char(cdc->interface, checksum);
+    tud_cdc_n_write_flush(cdc->interface);
+}
+
+static led_resp_t *led_init_resp(cdc_t *cdc, uint8_t payload_len)
+{
+    static led_resp_t resp;
+    resp.hdr.dst = cdc->hdr.src;
+    resp.hdr.src = cdc->hdr.dst;
+    resp.hdr.len = payload_len + 3;
+    resp.hdr.status = 1;
+    resp.hdr.cmd = cdc->hdr.cmd;
+    resp.hdr.report = 1;
+    return &resp;
+}
+
+static void led_ack_ok(cdc_t *cdc)
+{
+    led_resp_t *resp = led_init_resp(cdc, 0);
+    led_write(cdc, resp);
+}
+
+static uint8_t led_ram[256];
+
+static void led_set_eeprom(cdc_t *cdc)
+{
+    led_ram[cdc->led.eeprom.addr] = cdc->led.eeprom.data;
+    led_ack_ok(cdc);
+}
+
+static void led_get_eeprom(cdc_t *cdc)
+{
+    led_resp_t *resp = led_init_resp(cdc, 1);
+    resp->payload[0] = led_ram[cdc->led.eeprom.addr];
+    led_write(cdc, resp);
+}
+
+static void led_board_info(cdc_t *cdc)
+{
+    led_resp_t *resp = led_init_resp(cdc, 10);
+    memcpy(resp->payload, "15070-04\xff\x90", 10);
+    led_write(cdc, resp);
+}
+
+static void led_board_status(cdc_t *cdc)
+{
+    led_resp_t *resp = led_init_resp(cdc, 4);
+    memcpy(resp->payload, "\x00\x00\x00\x00", 4);
+    led_write(cdc, resp);
+}
+
+static void led_proto_ver(cdc_t *cdc)
+{
+    led_resp_t *resp = led_init_resp(cdc, 3);
+    memcpy(resp->payload, "\x01\x00\x00", 3);
+    led_write(cdc, resp);
+}
+
 static void led_cmd(cdc_t *cdc)
 {
     cdc->in_cmd = false;
@@ -157,21 +252,34 @@ static void led_cmd(cdc_t *cdc)
             rgb_set_cab(1, gray32(cdc->led.ext, false));
             rgb_set_cab(2, gray32(cdc->led.side, false));
             break;
-        case 0x3C:
-            //printf("LED Upd\n");
-            break;
-        case 0x82:
-            printf("LED Dir\n");
-            break;
-        default:
-            printf("Unknown LED Cmd %02x\n", cdc->hdr.cmd);
+
+        case 0x7b:
+            led_set_eeprom(cdc);
             return;
+        case 0x7c:
+            led_get_eeprom(cdc);
+            return;
+        case 0xf0:
+            led_board_info(cdc);
+            return;
+        case 0xf1:
+            led_board_status(cdc);
+            return;
+        case 0xf3:
+            led_proto_ver(cdc);
+            return;
+
+        default:
+            printf("Ignoring LED Cmd %02x\n", cdc->hdr.cmd);
+            break;
     }
+
+    led_ack_ok(cdc);
 }
 
 static inline void assemble_cmd(cdc_t *cdc, uint8_t c)
 {
-    if (c == 0xE0) {
+    if (c == SYNC) {
         cdc->len = 0;
         cdc->in_cmd = true;
         cdc->is_touch = false;
@@ -199,7 +307,7 @@ static inline void assemble_cmd(cdc_t *cdc, uint8_t c)
     }
 
     // LED cmd
-    if (c == 0xD0) {
+    if (c == ESCAPE) {
         cdc->escape = true;
         return;
     }
