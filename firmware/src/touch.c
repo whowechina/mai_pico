@@ -88,13 +88,23 @@ void touch_update()
     touch_stat();
 }
 
+static bool sensor_ok[3];
+bool touch_sensor_ok(unsigned i)
+{
+    if (i < 3) {
+        return sensor_ok[i];
+    }
+    return false;
+}
+
 const uint16_t *touch_raw()
 {
     static uint16_t readout[36];
     uint16_t buf[36];
-    mpr121_raw(MPR121_ADDR, buf, 12);
-    mpr121_raw(MPR121_ADDR + 1, buf + 12, 12);
-    mpr121_raw(MPR121_ADDR + 2, buf + 24, 10);
+
+    for (int i = 0; i < 3; i++) {
+        sensor_ok[i] = mpr121_raw(MPR121_ADDR + i, buf + i * 12, 12);
+    }
 
     for (int i = 0; i < 34; i++) {
         readout[touch_map[i]] = buf[i];

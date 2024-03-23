@@ -123,7 +123,7 @@ void mpr121_init(uint8_t i2c_addr)
     // (Auto configure result) alone. 
 
     // I want to max out sensitivity, I don't care linearity
-    const uint8_t usl = (3.3 - 0.1) / 3.3 * 256;
+    const uint8_t usl = 255; //(3.3 - 0.0) / 3.3 * 256;
     write_reg(i2c_addr, 0x7D, usl),  
     write_reg(i2c_addr, 0x7E, usl * 0.65),
     write_reg(i2c_addr, 0x7F, usl * 0.9);
@@ -133,21 +133,26 @@ void mpr121_init(uint8_t i2c_addr)
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
-static void mpr121_read_many(uint8_t addr, uint8_t reg, uint8_t *buf, size_t n)
+static bool mpr121_read_many(uint8_t addr, uint8_t reg, uint8_t *buf, size_t n)
 {
     i2c_write_blocking_until(I2C_PORT, addr, &reg, 1, true,
                              time_us_64() + IO_TIMEOUT_US);
-    i2c_read_blocking_until(I2C_PORT, addr, buf, n, false,
-                             time_us_64() + IO_TIMEOUT_US * n / 2);
+    int bytes = i2c_read_blocking_until(I2C_PORT, addr, buf, n, false,
+                                        time_us_64() + IO_TIMEOUT_US * n / 2);
+    return bytes == n;
 }
 
-static void mpr121_read_many16(uint8_t addr, uint8_t reg, uint16_t *buf, size_t n)
+static bool mpr121_read_many16(uint8_t addr, uint8_t reg, uint16_t *buf, size_t n)
 {
     uint8_t vals[n * 2];
-    mpr121_read_many(addr, reg, vals, n * 2);
+    if (!mpr121_read_many(addr, reg, vals, n * 2)){
+        return false;
+    }
+
     for (int i = 0; i < n; i++) {
         buf[i] = (vals[i * 2 + 1] << 8) | vals[i * 2];
     }
+    return true;
 }
 
 uint16_t mpr121_touched(uint8_t addr)
@@ -157,9 +162,9 @@ uint16_t mpr121_touched(uint8_t addr)
     return touched;
 }
 
-void mpr121_raw(uint8_t addr, uint16_t *raw, int num)
+bool mpr121_raw(uint8_t addr, uint16_t *raw, int num)
 {
-    mpr121_read_many16(addr, MPR121_ELECTRODE_FILTERED_DATA_REG, raw, num);
+    return mpr121_read_many16(addr, MPR121_ELECTRODE_FILTERED_DATA_REG, raw, num);
 }
 
 static uint8_t mpr121_stop(uint8_t addr)

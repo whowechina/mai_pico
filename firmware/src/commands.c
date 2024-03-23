@@ -361,8 +361,13 @@ static void print_raw_zones(const char *title, const uint16_t *raw, int num)
 static void handle_raw()
 {
     printf("Touch raw readings:\n");
-    printf("   |__1__|__2__|__3__|__4__|__5__|__6__|__7__|__8__|\n");
     const uint16_t *raw = touch_raw();
+    printf("   Sensor: 0: %s, 1: %s 2: %s\n",
+            touch_sensor_ok(0) ? "OK" : "ERR",
+            touch_sensor_ok(1) ? "OK" : "ERR",
+            touch_sensor_ok(2) ? "OK" : "ERR");
+
+    printf("   |__1__|__2__|__3__|__4__|__5__|__6__|__7__|__8__|\n");
     print_raw_zones("A", raw, 8);
     print_raw_zones("B", raw + 8, 8);
     print_raw_zones("C", raw + 16, 2);
