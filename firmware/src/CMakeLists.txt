@@ -19,6 +19,7 @@ function(make_firmware board board_def)
                                ${LWIP_ROOT}/src/include)
     
     target_link_libraries(${board} PRIVATE
+        aic
         pico_multicore pico_stdlib hardware_pio hardware_pwm hardware_flash
         hardware_adc hardware_i2c hardware_watchdog pico_unique_id
         tinyusb_device tinyusb_board)

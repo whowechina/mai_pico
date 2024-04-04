@@ -1,0 +1,3 @@
+[submodule "aic_pico"]
+	path = firmware/modules/aic_pico
+	url = https://github.com/whowechina/aic_pico
