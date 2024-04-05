@@ -10,6 +10,7 @@
 * 使用 15.6 英寸的便携式屏幕制作。
 * 类似街机的体验。
 * 可以双人游戏。
+* 内置支持 AIME。
 * 所有源文件开放。
 
 感谢许多尊敬的爱好者和公司将他们的工具或材料免费或开源（KiCad，OnShape，InkScape，Raspberry 相关工具, 嘉立创）。
@@ -70,6 +71,9 @@ https://github.com/whowechina/
 * 16x WS2812B-3528 RGB LED（每个按钮需要两个）。
 * 8x Kailh Choc v1 键盘开关，线性的，30gf 到 45gf 的。
   https://www.kailhswitch.com/mechanical-keyboard-switches/low-profile-key-switches/burnt-orange-switch.html
+* 1x PN532 NFC 模块和一些细电线, 只有需要 AIME 的时候才用得上.  
+  https://www.elechouse.com/product/pn532-nfc-rfid-module-v4/  
+  你需要把它焊接到 MPR121 所在的 I2C 总线上（GPIO 6 and 7）。
 
 ### ITO 玻璃
 * 找一个服务定制蚀刻 ITO 镀膜玻璃。AutoCAD 文件是 `Production\CAD\mai_pico_ito_v*.dwg`。使用 2mm 厚，10-20ohm 平方电阻的 ITO 镀膜玻璃。  
@@ -122,8 +126,13 @@ https://github.com/whowechina/
 * LED 和 Touch 协议的实现遵循 Sucareto 在 https://github.com/Sucareto/Mai2Touch 上的研究。
 * 它有一个命令行进行配置。你可以使用这个 Web Serial Terminal 连接到 Mai Pico 的 USB 串口。（注意："?" 是帮助）  
   https://googlechromelabs.github.io/serial-terminal/  
-  <img src="doc/cmd.png" width="80%">
+  <img src="doc/cmd.png" width="60%">
+  * 当你点击这个网页的 Connect 按钮后，你能看到每个端口的名称。  
+   <img src="doc/ports.png" width="60%">
 * 可以使用 `gpio` 命令重新映射按钮 GPIOs，固件支持 8 个主按钮和 4 个辅助按钮（分别是：Test, Service, Navigate, Coin）。
+* 可以使用 `touch` 命令重新映射触摸键。对于用 ITO 膜手作触摸板，或者自己定制了引脚不同的 ITO 镀膜玻璃的朋友，这个命令会很有用:
+  * `touch` 不带参数，可以用来检测当前按下的触摸键。
+  * `touch 1 9 E6` 是映射第二个 MPR121 传感器的电极 9 到 “E6”，注意 “XX” 表示不连接任何触摸键。
 * 可以使用 `rgb` 命令为每个按钮分配串联的 RGB LED 数量。
 * 可以通过 `level` 命令调整 LED 的亮度。
 * 有 MPR121 参数调整和灵敏度设置，自己探索。
@@ -132,6 +141,7 @@ https://github.com/whowechina/
   * key1：`WEDCXZAQ`-按键环，`3`-Select
   * key2（小键盘）：`89632147`-按键环，`*`-Select
   * 上述两套都有：`F1`-Test `F2`-Service `F3`-投币
+* `factory` 用来复位到默认配置。当固件升级时，老配置可能失效，这时候请复位到默认配置，然后重新插拔一下控制器。
 
 ## CAD 源文件
 我正在使用 OnShape 的免费订阅。它很强大，但不能将原始设计存档到本地，所以我只能在这里分享链接。STL/DXF/DWG 文件是从这个在线文档导出的。  

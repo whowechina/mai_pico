@@ -8,6 +8,7 @@
 * Made with a 15.6 inch portable screen.
 * Arcade-like experience.
 * Dual-player is possible.
+* Built-in AIME support.
 * All source files open.
 
 Thanks to many respectful guys/companies who made their tools or materials free or open source (KiCad, OnShape, InkScape, Raspberry things, JLCPCB).
@@ -61,6 +62,9 @@ It's CC-NC. So DIY for yourself and for your friend, don't make money from it.
 * 16x WS2812B-3528 RGB LEDs (each button needs two).
 * 8x Kailh Choc v1 key switches, linear, 30gf to 45gf ones.  
   https://www.kailhswitch.com/mechanical-keyboard-switches/low-profile-key-switches/burnt-orange-switch.html
+* 1x PN532 NFC module and some thin wires, only needed if you want AIME.  
+  https://www.elechouse.com/product/pn532-nfc-rfid-module-v4/  
+  You need to solder it to the same I2C as the MPR121 (GPIO 6 and 7).
 
 ### ITO Glass
 * Find a service to make custom etching ITO coated glass. The AutoCAD file is `Production\CAD\mai_pico_ito_v*.dwg`. Use 2mm thickness, 10-20ohm sheet resistance ITO coated glass.
@@ -112,10 +116,15 @@ It's CC-NC. So DIY for yourself and for your friend, don't make money from it.
 * UF2 file is in `Production\Firmware` folder.
 * For the new build, hold the BOOTSEL button while connect the USB to a PC, there will be a disk named "RPI-RP2" showed up. Drag the UF2 firmware binary file into it. That's it.
 * LED and Touch protocols are implemented following Sucareto's research at https://github.com/Sucareto/Mai2Touch.
-* It has a command line to do configuration. You can use this Web Serial Terminal to connect to the USB serial port of the Mai Pico. (Note: "?" is for help)  
+* It has a command line to do configuration. You can use this Web Serial Terminal to connect to the USB serial port of the Mai Pico. (`?` to display help message.)  
   https://googlechromelabs.github.io/serial-terminal/  
-  <img src="doc/cmd.png" width="80%">
-* Button GPIOs can be remapped using `gpio` command. Firmware supports 8 main buttons on the ring and 4 auxiliary buttons (Test, Service, Navigate and Coin). 
+  <img src="doc/cmd.png" width="60%">
+   * Please note that when you click "Connect" button, you'll actually see the name of each port.  
+   <img src="doc/ports.png" width="60%">
+* Button GPIOs can be remapped using `gpio` command. Firmware supports 8 main buttons on the ring and 4 auxiliary buttons (Test, Service, Navigate and Coin).
+* Touch keys can be remapped using `touch` command. For people who's using Mai Pico to drive a custom ITO film or a ITO glass, this command will be very useful. For example:
+  * `touch` with no parameter is to detect touched keys.
+  * `touch 1 9 E6` is to set the second MPR121's electrode 9 to key "E6". Key name of "XX" means "Not Connected".
 * Daisy chained RGB LED numbers for each button can be assigned using `rgb` command.
 * LED brightness can be adjusted by `level` command.
 * There are MPR121 parameter tuning and sensitive settings, explore them yourself.
@@ -124,6 +133,7 @@ It's CC-NC. So DIY for yourself and for your friend, don't make money from it.
   * key1: `WEDCXZAQ`-Ring Buttons, `3`-Select
   * key2 (Numpad): `89632147`-Ring Buttons, `*`-Select
   * Above two sets both have: `F1`-Test `F2`-Service `F3`-Coin
+* `factory` to reset to default. When there's a firmware update, the old configuration may become corrupted, you can reset configuration, then re-plug the controller.
 
 ## CAD Source File
 I'm using OnShape free subscription. It's powerful but it can't archive original designs to local, so I can only share the link here. STL/DXF/DWG files are exported from this online document.  
