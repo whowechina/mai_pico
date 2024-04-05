@@ -66,7 +66,7 @@ static void disp_hid()
 static void disp_aime()
 {
     printf("[AIME]\n");
-    printf("    Virtual AIC: %s\n", mai_cfg->virtual_aic ? "ON" : "OFF");
+    printf("    Virtual AIC: %s\n", mai_cfg->aime.virtual_aic ? "ON" : "OFF");
 }
 
 static void disp_gpio()
@@ -471,9 +471,9 @@ static void handle_virtual(int argc, char *argv[])
         return;
     }
 
-    mai_cfg->virtual_aic = (match == 0);
+    mai_cfg->aime.virtual_aic = (match == 0);
 
-    aime_virtual_aic(mai_cfg->virtual_aic);
+    aime_virtual_aic(mai_cfg->aime.virtual_aic);
     config_changed();
 }
 

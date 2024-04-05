@@ -8,6 +8,7 @@
 
 #include "config.h"
 #include "save.h"
+#include "touch.h"
 
 mai_cfg_t *mai_cfg;
 
@@ -32,8 +33,11 @@ static mai_cfg_t default_cfg = {
     },
     .alt = {
         .buttons = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+        .touch = TOUCH_MAP,
     },
-    .virtual_aic = false,
+    .aime = {
+        .virtual_aic = false,
+    }
 };
 
 mai_runtime_t *mai_runtime;

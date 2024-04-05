@@ -25,14 +25,7 @@
 static uint16_t touch[3];
 static unsigned touch_counts[36];
 
-enum touch_pads {
-    A1 = 0, A2, A3, A4, A5, A6, A7, A8,
-    B1, B2, B3, B4, B5, B6, B7, B8,
-    C1, C2, D1, D2, D3, D4, D5, D6, D7, D8,
-    E1, E2, E3, E4, E5, E6, E7, E8,
-};
-
-static unsigned touch_map[] = TOUCH_MAP;
+static uint8_t touch_map[] = TOUCH_MAP;
 
 void touch_init()
 {
@@ -46,6 +39,7 @@ void touch_init()
         mpr121_init(MPR121_ADDR + m);
     }
     touch_update_config();
+    memcpy(touch_map, mai_cfg->alt.touch, sizeof(touch_map));
 }
 
 static uint64_t touch_reading;

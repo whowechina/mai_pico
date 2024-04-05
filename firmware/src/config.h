@@ -9,6 +9,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "board_defs.h"
+
 typedef struct __attribute__((packed)) {
     struct {
         uint32_t key_on;
@@ -32,8 +34,11 @@ typedef struct __attribute__((packed)) {
     } rgb;
     struct {
         uint8_t buttons[12];
+        uint8_t touch[34];
     } alt;
-    bool virtual_aic;
+    struct {
+        bool virtual_aic;
+    } aime;
 } mai_cfg_t;
 
 typedef struct {
