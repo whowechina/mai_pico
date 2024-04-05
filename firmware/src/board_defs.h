@@ -24,7 +24,7 @@
 
 #define TOUCH_MAP { E3, A2, B2, D2, E2, A1, B1, D1, E1, C2, A8, B8, \
                     D8, E8, A7, B7, D7, E7, A6, B6, D6, E6, A5, B5, \
-                    D5, E5, C1, A4, B4, D4, E4, A3, B3, D3 }
+                    D5, E5, C1, A4, B4, D4, E4, A3, B3, D3, XX, XX }
 #else
 
 #endif

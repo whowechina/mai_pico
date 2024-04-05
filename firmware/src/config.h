@@ -34,7 +34,7 @@ typedef struct __attribute__((packed)) {
     } rgb;
     struct {
         uint8_t buttons[12];
-        uint8_t touch[34];
+        uint8_t touch[36];
     } alt;
     struct {
         bool virtual_aic;

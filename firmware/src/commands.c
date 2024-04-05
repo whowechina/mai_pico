@@ -9,6 +9,7 @@
 
 #include "tusb.h"
 
+#include "mpr121.h"
 #include "touch.h"
 #include "button.h"
 #include "config.h"
@@ -16,6 +17,7 @@
 #include "cli.h"
 
 #include "aime.h"
+#include "nfc.h"
 
 #define SENSE_LIMIT_MAX 9
 #define SENSE_LIMIT_MIN -9
@@ -66,6 +68,7 @@ static void disp_hid()
 static void disp_aime()
 {
     printf("[AIME]\n");
+    printf("    NFC Module: %s\n", nfc_module_name());
     printf("    Virtual AIC: %s\n", mai_cfg->aime.virtual_aic ? "ON" : "OFF");
 }
 
@@ -81,6 +84,21 @@ static void disp_gpio()
         button_real_gpio(10), button_real_gpio(11));
 }
 
+static void disp_touch()
+{
+    printf("[Touch]\n");
+    printf("     ADDR|_0|_1|_2|_3|_4|_5|_6|_7|_8|_9|10|11|\n");
+
+    for (int m = 0; m < 3; m++) {
+        printf("  %d: 0x%02x|", m, MPR121_BASE_ADDR + m);
+        for (int chn = 0; chn < 12; chn++) {
+            int key = touch_key_from_channel(m * 12 + chn);
+            printf("%2s|", touch_key_name(key));
+        }
+        printf("\n");
+    }
+}
+
 void handle_display(int argc, char *argv[])
 {
     const char *usage = "Usage: display [rgb|sense|hid|gpio|aime]\n";
@@ -94,12 +112,13 @@ void handle_display(int argc, char *argv[])
         disp_sense();
         disp_hid();
         disp_gpio();
+        disp_touch();
         disp_aime();
         return;
     }
 
-    const char *choices[] = {"rgb", "sense", "hid", "gpio", "aime"};
-    switch (cli_match_prefix(choices, 5, argv[0])) {
+    const char *choices[] = {"rgb", "sense", "hid", "gpio", "touch", "aime"};
+    switch (cli_match_prefix(choices, 6, argv[0])) {
         case 0:
             disp_rgb();
             break;
@@ -113,6 +132,9 @@ void handle_display(int argc, char *argv[])
             disp_gpio();
             break;
         case 4:
+            disp_touch();
+            break;
+        case 5:
             disp_aime();
             break;
         default:
@@ -456,6 +478,62 @@ static void handle_gpio(int argc, char *argv[])
     disp_gpio();
 }
 
+static void detect_touch()
+{
+    bool touched = false;
+    for (int i = 0; i < 34; i++) {
+        if (touch_touched(i)) {
+            touched = true;
+            printf("Touched: %s", touch_key_name(i));
+            uint8_t pad = touch_key_channel(i);
+            if (pad >= 0) {
+                printf(" (Sensor %d, Electrode %d)\n", pad / 12, pad % 12 + 1);
+            } else {
+                printf(" (nil)\n");
+            }
+        }
+    }
+    if (!touched) {
+        printf("No touch detected.\n");
+    }
+}
+
+static bool set_touch_map(int argc, char *argv[])
+{
+    if (argc != 3) {
+        return false;
+    }
+    if (strlen(argv[2]) != 2) {
+        return false;
+    }
+    int sensor = cli_extract_non_neg_int(argv[0], 0);
+    int channel = cli_extract_non_neg_int(argv[1], 0);
+    int key = touch_key_by_name(argv[2]);
+
+    if ((sensor < 0) || (sensor > 2) ||
+        (channel < 0) || (channel > 11) ||
+        (key < 0)) {
+        return false;
+    }
+    touch_set_map(sensor * 12 + channel, key);
+    return true;
+}
+
+static void handle_touch(int argc, char *argv[])
+{
+    const char *usage = "Usage: touch [<sensor> <channel> <key>]\n"
+                        "  sensor: 0..2\n"
+                        " channel: 0..11\n"
+                        "     key: A1, C2, E5, etc. XX means Not Connected.)\n";
+    if (argc == 0) {
+        detect_touch();
+    } else if (set_touch_map(argc, argv)) {
+        disp_touch();
+    } else {
+        printf(usage);
+    }
+}
+
 static void handle_virtual(int argc, char *argv[])
 {
     const char *usage = "Usage: virtual <on|off>\n";
@@ -491,6 +569,7 @@ void commands_init()
     cli_register("whoami", handle_whoami, "Identify each com port.");
     cli_register("save", handle_save, "Save config to flash.");
     cli_register("gpio", handle_gpio, "Set GPIO pins for buttons.");
+    cli_register("touch", handle_touch, "Custimze touch mapping.");
     cli_register("factory", config_factory_reset, "Reset everything to default.");
     cli_register("virtual", handle_virtual, "Virtual AIC card on AIME.");
 }

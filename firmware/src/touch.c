@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <stdbool.h>
 
 #include "bsp/board.h"
@@ -40,19 +41,67 @@ void touch_init()
     memcpy(touch_map, mai_cfg->alt.touch, sizeof(touch_map));
 }
 
-const char *touch_pad_name(unsigned i)
+const char *touch_key_name(unsigned key)
 {
     static char name[3] = { 0 };
-    if (i < 18) {
-        name[0] = "ABC"[i / 8];
-        name[1] = '1' + i % 8;
-    } else if (i < 34) {
-        name[0] = "DE"[(i - 18) / 8];
-        name[1] = '1' + (i - 18) % 8;
+    if (key < 18) {
+        name[0] = "ABC"[key / 8];
+        name[1] = '1' + key % 8;
+    } else if (key < 34) {
+        name[0] = "DE"[(key - 18) / 8];
+        name[1] = '1' + (key - 18) % 8;
     } else {
         return "XX";
     }
     return name;
+}
+
+int touch_key_by_name(const char *name)
+{
+    if (strlen(name) != 2) {
+        return -1;
+    }
+    if (strcasecmp(name, "XX") == 0) {
+        return 255;
+    }
+
+    int zone = toupper(name[0]) - 'A';
+    int id = name[1] - '1';
+    if ((zone < 0) || (zone > 4) || (id < 0) || (id > 7)) {
+        return -1;
+    }
+    if ((zone == 2) && (id > 1)) {
+        return -1; // C1 and C2 only
+    }
+    const int offsets[] = { 0, 8, 16, 18, 26 };
+    return offsets[zone] + id;
+}
+
+int touch_key_channel(unsigned key)
+{
+    for (int i = 0; i < 36; i++) {
+        if (touch_map[i] == key) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+unsigned touch_key_from_channel(unsigned channel)
+{
+    if (channel < 36) {
+        return touch_map[channel];
+    }
+    return 0xff;
+}
+
+void touch_set_map(unsigned sensor, unsigned key)
+{
+    if (sensor < 36) {
+        touch_map[sensor] = key;
+        memcpy(mai_cfg->alt.touch, touch_map, sizeof(mai_cfg->alt.touch));
+        config_changed();
+    }
 }
 
 static uint64_t touch_reading;
