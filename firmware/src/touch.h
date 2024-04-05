@@ -14,7 +14,10 @@ enum touch_pads {
     B1, B2, B3, B4, B5, B6, B7, B8,
     C1, C2, D1, D2, D3, D4, D5, D6, D7, D8,
     E1, E2, E3, E4, E5, E6, E7, E8,
+    XX = 255
 };
+
+const char *touch_pad_name(unsigned i);
 
 void touch_init();
 void touch_update();

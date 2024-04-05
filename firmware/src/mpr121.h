@@ -7,6 +7,8 @@
 #ifndef MP121_H
 #define MP121_H
 
+#define MPR121_BASE_ADDR 0x5A
+
 void mpr121_init(uint8_t addr);
 
 uint16_t mpr121_touched(uint8_t addr);
