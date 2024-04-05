@@ -165,10 +165,10 @@ static const char *string_desc_arr[] = {
     serial_number_str, // 3: Serials, use chip ID
     "I/O CONTROL BD;15257;01;90;1831;6679A;00;GOUT=14_ADIN=8,E_ROTIN=4_COININ=2_SWIN=2,E_UQ1=41,6;",
     "Mai Pico NKRO",
-    "Mai Pico Command Line",
-    "Mai Pico Touch",
-    "Mai Pico LED",
-    "Mai Pico AIME",
+    "Mai Pico Command Line Port",
+    "Mai Pico Touch Port",
+    "Mai Pico LED Port",
+    "Mai Pico AIME Port",
 };
 
 // Invoked when received GET STRING DESCRIPTOR request
