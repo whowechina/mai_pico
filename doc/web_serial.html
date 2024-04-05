@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Serial Ports</title>
+</head>
+<body>
+    <h1>Available Serial Ports:</h1>
+    <button id="listPorts">List Ports</button>
+    <ul id="ports"></ul>
+
+    <script>
+        document.getElementById('listPorts').addEventListener('click', async () => {
+            if ('serial' in navigator) {
+                try {
+                    const ports = await navigator.serial.getPorts();
+                    const ul = document.getElementById('ports');
+                    ul.innerHTML = ''; // Clear the list before adding new items
+                    ports.forEach(port => {
+                        const li = document.createElement('li');
+                        li.textContent = port.getInfo().usbProductId || 'Unknown';
+                        ul.appendChild(li);
+                    });
+                } catch (err) {
+                    console.error('There was an error opening the serial port:', err);
+                }
+            } else {
+                console.error('Web serial doesn\'t seem to be enabled in your browser. Try enabling it by visiting:');
+                console.error('chrome://flags/#enable-experimental-web-platform-features');
+                console.error('opera://flags/#enable-experimental-web-platform-features');
+                console.error('edge://flags/#enable-experimental-web-platform-features');
+            }
+        });
+    </script>
+</body>
+</html>
