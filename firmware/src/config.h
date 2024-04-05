@@ -33,6 +33,7 @@ typedef struct __attribute__((packed)) {
     struct {
         uint8_t buttons[12];
     } alt;
+    bool virtual_aic;
 } mai_cfg_t;
 
 typedef struct {

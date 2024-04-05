@@ -33,6 +33,7 @@ static mai_cfg_t default_cfg = {
     .alt = {
         .buttons = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
     },
+    .virtual_aic = false,
 };
 
 mai_runtime_t *mai_runtime;

@@ -87,12 +87,13 @@ enum { ITF_NUM_JOY, ITF_NUM_NKRO,
        ITF_NUM_CDC_CLI, ITF_NUM_CDC_CLI_DATA,
        ITF_NUM_CDC_TOUCH, ITF_NUM_CDC_TOUCH_DATA,
        ITF_NUM_CDC_LED, ITF_NUM_CDC_LED_DATA,
+       ITF_NUM_CDC_AIME, ITF_NUM_CDC_AIME_DATA,
        ITF_NUM_TOTAL };
 
 #define CONFIG_TOTAL_LEN (TUD_CONFIG_DESC_LEN +         \
                           TUD_HID_INOUT_DESC_LEN * 1 +  \
                           TUD_HID_DESC_LEN * 1 +        \
-                          TUD_CDC_DESC_LEN * 3)
+                          TUD_CDC_DESC_LEN * 4)
 
 #define EPNUM_JOY 0x81
 #define EPNUM_OUTPUT 0x01
@@ -105,10 +106,14 @@ enum { ITF_NUM_JOY, ITF_NUM_NKRO,
 #define EPNUM_CDC_TOUCH_NOTIF 0x85
 #define EPNUM_CDC_TOUCH_OUT 0x06
 #define EPNUM_CDC_TOUCH_IN  0x86
+
 #define EPNUM_CDC_LED_NOTIF 0x87
 #define EPNUM_CDC_LED_OUT 0x08
 #define EPNUM_CDC_LED_IN  0x88
 
+#define EPNUM_CDC_AIME_NOTIF 0x89
+#define EPNUM_CDC_AIME_OUT 0x0a
+#define EPNUM_CDC_AIME_IN  0x8a
 
 uint8_t const desc_configuration_joy[] = {
     // Config number, interface count, string index, total length, attribute,
@@ -134,6 +139,9 @@ uint8_t const desc_configuration_joy[] = {
 
     TUD_CDC_DESCRIPTOR(ITF_NUM_CDC_LED, 8, EPNUM_CDC_LED_NOTIF,
                        8, EPNUM_CDC_LED_OUT, EPNUM_CDC_LED_IN, 64),
+
+    TUD_CDC_DESCRIPTOR(ITF_NUM_CDC_AIME, 9, EPNUM_CDC_AIME_NOTIF,
+                       8, EPNUM_CDC_AIME_OUT, EPNUM_CDC_AIME_IN, 64),
 };
 
 // Invoked when received GET CONFIGURATION DESCRIPTOR
@@ -157,9 +165,10 @@ static const char *string_desc_arr[] = {
     serial_number_str, // 3: Serials, use chip ID
     "I/O CONTROL BD;15257;01;90;1831;6679A;00;GOUT=14_ADIN=8,E_ROTIN=4_COININ=2_SWIN=2,E_UQ1=41,6;",
     "Mai Pico NKRO",
-    "Mai Pico Command Serial Port",
-    "Mai Pico Touch Serial Port",
-    "Mai Pico LED Serial Port",
+    "Mai Pico Command Line",
+    "Mai Pico Touch",
+    "Mai Pico LED",
+    "Mai Pico AIME",
 };
 
 // Invoked when received GET STRING DESCRIPTOR request

@@ -21,6 +21,9 @@
 #include "tusb.h"
 #include "usb_descriptors.h"
 
+#include "aime.h"
+#include "nfc.h"
+
 #include "board_defs.h"
 
 #include "touch.h"
@@ -51,6 +54,25 @@ static void run_lights()
     }
 }
 
+
+const int aime_intf = 3;
+static void cdc_aime_putc(uint8_t byte)
+{
+    tud_cdc_n_write(aime_intf, &byte, 1);
+    tud_cdc_n_write_flush(aime_intf);
+}
+
+static void aime_run()
+{
+    if (tud_cdc_n_available(aime_intf)) {
+        uint8_t buf[32];
+        uint32_t count = tud_cdc_n_read(aime_intf, buf, sizeof(buf));
+
+        for (int i = 0; i < count; i++) {
+            aime_feed(buf[i]);
+        }
+    }
+}
 static mutex_t core1_io_lock;
 static void core1_loop()
 {
@@ -74,6 +96,7 @@ static void core0_loop()
         io_update();
 
         cli_run();
+        aime_run();
         save_loop();
         cli_fps_count(0);
 
@@ -104,6 +127,11 @@ void init()
     touch_init();
     button_init();
     rgb_init();
+
+    nfc_attach_i2c(I2C_PORT);
+    nfc_init();
+    aime_init(cdc_aime_putc);
+    aime_virtual_aic(mai_cfg->virtual_aic);
 
     cli_init("mai_pico>", "\n   << Mai Pico Controller >>\n"
                             " https://github.com/whowechina\n\n");

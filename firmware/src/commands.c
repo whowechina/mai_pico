@@ -15,6 +15,8 @@
 #include "save.h"
 #include "cli.h"
 
+#include "aime.h"
+
 #define SENSE_LIMIT_MAX 9
 #define SENSE_LIMIT_MIN -9
 
@@ -61,6 +63,12 @@ static void disp_hid()
            mai_cfg->hid.nkro <= 2 ? nkro[mai_cfg->hid.nkro] : "key1");
 }
 
+static void disp_aime()
+{
+    printf("[AIME]\n");
+    printf("    Virtual AIC: %s\n", mai_cfg->virtual_aic ? "ON" : "OFF");
+}
+
 static void disp_gpio()
 {
     printf("[GPIO]\n");
@@ -75,7 +83,7 @@ static void disp_gpio()
 
 void handle_display(int argc, char *argv[])
 {
-    const char *usage = "Usage: display [rgb|sense|hid|gpio]\n";
+    const char *usage = "Usage: display [rgb|sense|hid|gpio|aime]\n";
     if (argc > 1) {
         printf(usage);
         return;
@@ -86,11 +94,12 @@ void handle_display(int argc, char *argv[])
         disp_sense();
         disp_hid();
         disp_gpio();
+        disp_aime();
         return;
     }
 
-    const char *choices[] = {"rgb", "sense", "hid", "gpio"};
-    switch (cli_match_prefix(choices, 4, argv[0])) {
+    const char *choices[] = {"rgb", "sense", "hid", "gpio", "aime"};
+    switch (cli_match_prefix(choices, 5, argv[0])) {
         case 0:
             disp_rgb();
             break;
@@ -102,6 +111,9 @@ void handle_display(int argc, char *argv[])
             break;
         case 3:
             disp_gpio();
+            break;
+        case 4:
+            disp_aime();
             break;
         default:
             printf(usage);
@@ -444,6 +456,27 @@ static void handle_gpio(int argc, char *argv[])
     disp_gpio();
 }
 
+static void handle_virtual(int argc, char *argv[])
+{
+    const char *usage = "Usage: virtual <on|off>\n";
+    if (argc != 1) {
+        printf("%s", usage);
+        return;
+    }
+
+    const char *commands[] = { "on", "off" };
+    int match = cli_match_prefix(commands, 2, argv[0]);
+    if (match < 0) {
+        printf("%s", usage);
+        return;
+    }
+
+    mai_cfg->virtual_aic = (match == 0);
+
+    aime_virtual_aic(mai_cfg->virtual_aic);
+    config_changed();
+}
+
 void commands_init()
 {
     cli_register("display", handle_display, "Display all config.");
@@ -459,4 +492,5 @@ void commands_init()
     cli_register("save", handle_save, "Save config to flash.");
     cli_register("gpio", handle_gpio, "Set GPIO pins for buttons.");
     cli_register("factory", config_factory_reset, "Reset everything to default.");
+    cli_register("virtual", handle_virtual, "Virtual AIC card on AIME.");
 }
