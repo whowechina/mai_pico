@@ -37,7 +37,8 @@ typedef struct __attribute__((packed)) {
         uint8_t touch[36];
     } alt;
     struct {
-        bool virtual_aic;
+        uint8_t mode : 4;
+        uint8_t virtual_aic : 4;
     } aime;
 } mai_cfg_t;
 

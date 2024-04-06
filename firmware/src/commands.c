@@ -70,6 +70,7 @@ static void disp_aime()
     printf("[AIME]\n");
     printf("    NFC Module: %s\n", nfc_module_name());
     printf("    Virtual AIC: %s\n", mai_cfg->aime.virtual_aic ? "ON" : "OFF");
+    printf("         Mode: %d\n", mai_cfg->aime.mode);
 }
 
 static void disp_gpio()
@@ -534,25 +535,60 @@ static void handle_touch(int argc, char *argv[])
     }
 }
 
-static void handle_virtual(int argc, char *argv[])
+
+static bool handle_aime_mode(const char *mode)
 {
-    const char *usage = "Usage: virtual <on|off>\n";
-    if (argc != 1) {
-        printf("%s", usage);
-        return;
+    if (strcmp(mode, "0") == 0) {
+        mai_cfg->aime.mode = 0;
+    } else if (strcmp(mode, "1") == 0) {
+        mai_cfg->aime.mode = 1;
+    } else {
+        return false;
     }
+    aime_set_mode(mai_cfg->aime.mode);
+    config_changed();
+    return true;
+}
 
-    const char *commands[] = { "on", "off" };
-    int match = cli_match_prefix(commands, 2, argv[0]);
-    if (match < 0) {
-        printf("%s", usage);
-        return;
+static bool handle_aime_virtual(const char *onoff)
+{
+    if (strcasecmp(onoff, "on") == 0) {
+        mai_cfg->aime.virtual_aic = 1;
+    } else if (strcasecmp(onoff, "off") == 0) {
+        mai_cfg->aime.virtual_aic = 0;
+    } else {
+        return false;
     }
-
-    mai_cfg->aime.virtual_aic = (match == 0);
-
     aime_virtual_aic(mai_cfg->aime.virtual_aic);
     config_changed();
+    return true;
+}
+
+static void handle_aime(int argc, char *argv[])
+{
+    const char *usage = "Usage:\n"
+                        "    aime mode <0|1>\n"
+                        "    aime virtual <on|off>\n";
+    if (argc != 2) {
+        printf("%s", usage);
+        return;
+    }
+
+    const char *commands[] = { "mode", "virtual" };
+    int match = cli_match_prefix(commands, 2, argv[0]);
+    
+    bool ok = false;
+    if (match == 0) {
+        ok = handle_aime_mode(argv[1]);
+    } else if (match == 1) {
+        ok = handle_aime_virtual(argv[1]);
+    }
+
+    if (ok) {
+        disp_aime();
+    } else {
+        printf("%s", usage);
+    }
 }
 
 void commands_init()
@@ -571,5 +607,5 @@ void commands_init()
     cli_register("gpio", handle_gpio, "Set GPIO pins for buttons.");
     cli_register("touch", handle_touch, "Custimze touch mapping.");
     cli_register("factory", config_factory_reset, "Reset everything to default.");
-    cli_register("virtual", handle_virtual, "Virtual AIC card on AIME.");
+    cli_register("aime", handle_aime, "AIME settings.");
 }

@@ -36,7 +36,8 @@ static mai_cfg_t default_cfg = {
         .touch = TOUCH_MAP,
     },
     .aime = {
-        .virtual_aic = false,
+        .mode = 0,
+        .virtual_aic = 0,
     }
 };
 
