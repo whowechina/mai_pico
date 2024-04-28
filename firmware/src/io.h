@@ -7,6 +7,6 @@
 #define IO_H_
 
 void io_update();
-uint64_t io_last_io_time();
+bool io_is_active();
 
 #endif

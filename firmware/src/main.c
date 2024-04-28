@@ -40,15 +40,20 @@
 static void run_lights()
 {
     uint64_t now = time_us_64();
-    if (io_last_io_time() != 0 && now - io_last_io_time() < 60000000) {
+    if (io_is_active()) {
         return;
     }
 
+    static uint16_t loop = 0;
+    loop++;
     uint16_t buttons = button_read();
     for (int i = 0; i < 8; i++) {
-        uint32_t color = mai_cfg->color.key_off;
+        uint8_t phase = (i * 256 + loop) / 8;
+        uint32_t color;
         if (buttons & (1 << i)) {
-            color = mai_cfg->color.key_on;
+            color = rgb32_from_hsv(phase, 64, 255);
+        } else {
+            color = rgb32_from_hsv(phase, 240, 20);
         }
         rgb_set_button(i, color, 0);
     }
@@ -89,7 +94,7 @@ static void core1_loop()
 
 static void core0_loop()
 {
-    static uint64_t next_frame = 0;
+    uint64_t next_frame = time_us_64();
 
     while(1) {
         tud_task();
@@ -101,7 +106,7 @@ static void core0_loop()
         cli_fps_count(0);
 
         sleep_until(next_frame);
-        next_frame = time_us_64() + 1000; // 1KHz
+        next_frame += 1000; // 1KHz
 
         touch_update();
         button_update();

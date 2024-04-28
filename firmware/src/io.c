@@ -8,6 +8,8 @@
 #include "touch.h"
 #include "rgb.h"
 
+#define IO_TIMEOUT_SEC 10
+
 static struct {
     bool stat;
     uint64_t last_io_time;
@@ -373,7 +375,11 @@ void io_update()
     send_touch();
 }
 
-uint64_t io_last_io_time()
+bool io_is_active()
 {
-    return ctx.last_io_time;
+    if (ctx.last_io_time == 0) {
+        return false;
+    }
+
+    return time_us_64() < ctx.last_io_time + IO_TIMEOUT_SEC * 1000000;
 }
