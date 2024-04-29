@@ -42,7 +42,7 @@ static uint16_t native_to_io4(uint16_t button)
 static void report_usb_hid()
 {
     if (tud_hid_ready()) {
-        if (mai_cfg->hid.joy) {
+        if (mai_cfg->hid.joy || mai_runtime.key_stuck) {
             static uint16_t last_buttons = 0;
             uint16_t buttons = button_read();
             hid_joy.buttons[0] = native_to_io4(buttons);
@@ -56,7 +56,7 @@ static void report_usb_hid()
             tud_hid_n_report(0, REPORT_ID_JOYSTICK, &hid_joy, sizeof(hid_joy));
             last_buttons = buttons;
         }
-        if (mai_cfg->hid.nkro) {
+        if (mai_cfg->hid.nkro && !mai_runtime.key_stuck) {
             tud_hid_n_report(1, 0, &hid_nkro, sizeof(hid_nkro));
         }
     }

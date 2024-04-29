@@ -63,6 +63,9 @@ static void disp_hid()
     const char *nkro[] = {"off", "key1", "key2"};
     printf("  Joy: %s, NKRO: %s\n", mai_cfg->hid.joy ? "on" : "off",
            mai_cfg->hid.nkro <= 2 ? nkro[mai_cfg->hid.nkro] : "key1");
+    if (mai_runtime.key_stuck) {
+        printf("  !!! Button stuck, force JOY only !!!\n");
+    }
 }
 
 static void disp_aime()
@@ -75,12 +78,11 @@ static void disp_aime()
 
 static void disp_gpio()
 {
-    printf("[GPIO]\n");
-    printf("  Main buttons:");
+    printf("[GPIO]\n ");
     for (int i = 0; i < 8; i++) {
-        printf(" %d:%d", i + 1, button_real_gpio(i));
+        printf(" B%d:GP%d", i + 1, button_real_gpio(i));
     }
-    printf("\n  Test:%d, Service:%d, Navigate:%d, Coin:%d\n",
+    printf("\n  Test:GP%d Svc:GP%d Nav:GP%d Coin:GP%d\n",
         button_real_gpio(8), button_real_gpio(9),
         button_real_gpio(10), button_real_gpio(11));
 }

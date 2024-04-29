@@ -11,6 +11,10 @@
 #include "hardware/flash.h"
 
 void button_init();
+
+/* if anykey is pressed, no debounce */
+bool button_is_stuck();
+
 uint8_t button_num();
 void button_update();
 uint16_t button_read();

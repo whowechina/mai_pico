@@ -42,6 +42,16 @@ void button_init()
     }
 }
 
+bool button_is_stuck()
+{
+    for (int i = 0; i < BUTTON_NUM; i++) {
+        if (!gpio_get(gpio_real[i])) {
+            return true;
+        }
+    }
+    return false;
+}
+
 uint8_t button_num()
 {
     return BUTTON_NUM;

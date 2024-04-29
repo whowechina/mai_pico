@@ -43,7 +43,8 @@ static mai_cfg_t default_cfg = {
     }
 };
 
-mai_runtime_t *mai_runtime;
+mai_runtime_t mai_runtime;
+
 static inline bool in_range(int val, int min, int max)
 {
     return (val >= min) && (val <= max);

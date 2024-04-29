@@ -44,10 +44,11 @@ typedef struct __attribute__((packed)) {
 
 typedef struct {
     uint16_t fps[2];
+    bool key_stuck;
 } mai_runtime_t;
 
 extern mai_cfg_t *mai_cfg;
-extern mai_runtime_t *mai_runtime;
+extern mai_runtime_t mai_runtime;
 
 void config_init();
 void config_changed(); // Notify the config has changed

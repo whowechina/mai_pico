@@ -142,6 +142,8 @@ void init()
     cli_init("mai_pico>", "\n   << Mai Pico Controller >>\n"
                             " https://github.com/whowechina\n\n");
     commands_init();
+
+    mai_runtime.key_stuck = button_is_stuck();
 }
 
 int main(void)
