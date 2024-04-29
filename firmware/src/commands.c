@@ -449,7 +449,7 @@ static void handle_gpio(int argc, char *argv[])
         uint8_t gpio_main[8];
         for (int i = 0; i < 8; i++) {
             int gpio = cli_extract_non_neg_int(argv[i + 1], 0);
-            if (gpio > 29) {
+            if ((gpio < 0) || (gpio > 29)) {
                 printf(usage);
                 return;
             }
