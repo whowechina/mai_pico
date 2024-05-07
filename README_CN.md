@@ -93,7 +93,7 @@ https://github.com/whowechina/
     <img src="doc/assemble_1.jpg" width="60%">
   * 首先焊接按钮 PCB。  
     <img src="doc/assemble_2.jpg" width="60%">
-  * PCB 使用短且柔软的 4 线电缆串联，它们是 LED_GND、LED、LED_5V 和 BUTTON_GND。BUTTON 信号引脚还没有焊接，你可以后面再焊接。请不用担心按钮 GPIOs 的顺序，因为它们可以通过命令行界面重新映射。    
+  * 按键 PCB 使用细小且柔软的 3 线电缆串联，它们是 G、IN/OUT、V，分别代表地、信号进/出和电源。按钮开关信号引脚还没有焊接，你可以后面再焊接。请不用担心按钮 GPIO 的顺序，因为它们可以通过命令行重新映射。    
     <img src="doc/assemble_3.jpg" width="60%">
   * 你需要 3M5423 UHMW 胶带（或类似的硬且超滑的 PTFE 胶带，厚度 0.2-0.3）。它用来润滑触摸键开关的按钮表面。  
     <img src="doc/button_lub.jpg" width="60%">

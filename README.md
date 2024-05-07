@@ -84,7 +84,7 @@ It's CC-NC. So DIY for yourself and for your friend, don't make money from it.
     <img src="doc/assemble_1.jpg" width="60%">
   * Solder the button PCB first.  
     <img src="doc/assemble_2.jpg" width="60%">
-  * PCBs are daisy-chained using short and soft 4-wire cable, they're LED_GND, LED, LED_5V and BUTTON_GND. The BUTTON signal pins are not soldered yet, you can later wire them. Don't worry about the order of button GPIOs, because they can be remapped through command line interface.    
+  * Button PCBs are daisy-chained using short and soft 3-wire cable, they're G, IN/OUT, V (GND, Signal In/Out and VCC respectively). RGB signal goes in from "IN" and goes out to the next LED through "OUT". The "Btn" button signal pins are not soldered yet, you can later wire them. Don't worry about the order of button GPIOs, because they can be remapped through command line interface.    
     <img src="doc/assemble_3.jpg" width="60%">
   * You need 3M5423 UHMW film tape (or similar hard and super-smooth PTFE tape with 0.2-0.3 thickness). It is to lubricate the button surface that touches the keyswitch.  
     <img src="doc/button_lub.jpg" width="60%">
