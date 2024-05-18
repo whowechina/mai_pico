@@ -40,7 +40,7 @@
 static void run_lights()
 {
     uint64_t now = time_us_64();
-    if (io_is_active()) {
+    if (io_is_active() || aime_is_active()) {
         return;
     }
 

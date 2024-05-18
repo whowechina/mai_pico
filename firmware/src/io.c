@@ -8,7 +8,7 @@
 #include "touch.h"
 #include "rgb.h"
 
-#define IO_TIMEOUT_SEC 10
+#define IO_TIMEOUT_SEC 60
 
 static struct {
     bool stat;
