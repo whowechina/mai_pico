@@ -61,7 +61,7 @@ static void disp_hid()
 {
     printf("[HID]\n");
     const char *nkro[] = {"off", "key1", "key2"};
-    printf("  Joy: %s, NKRO: %s\n", mai_cfg->hid.joy ? "on" : "off",
+    printf("  Joy: %s, NKRO: %s\n", mai_cfg->hid.joy ? "ON" : "OFF",
            mai_cfg->hid.nkro <= 2 ? nkro[mai_cfg->hid.nkro] : "key1");
     if (mai_runtime.key_stuck) {
         printf("  !!! Button stuck, force JOY only !!!\n");
@@ -71,9 +71,9 @@ static void disp_hid()
 static void disp_aime()
 {
     printf("[AIME]\n");
-    printf("    NFC Module: %s\n", nfc_module_name());
-    printf("    Virtual AIC: %s\n", mai_cfg->aime.virtual_aic ? "ON" : "OFF");
-    printf("         Mode: %d\n", mai_cfg->aime.mode);
+    printf("  NFC Module: %s\n", nfc_module_name());
+    printf("  Virtual AIC: %s\n", mai_cfg->aime.virtual_aic ? "ON" : "OFF");
+    printf("  Protocol Mode: %d\n", mai_cfg->aime.mode);
 }
 
 static void disp_gpio()
@@ -102,48 +102,57 @@ static void disp_touch()
     }
 }
 
+static void disp_tweak()
+{
+    printf("[Tweak]\n");
+    printf("  Main Buttons Active-High: %s\n",
+           mai_cfg->tweak.main_button_active_high ? "ON" : "OFF");
+    printf("  Aux Buttons Active-High: %s\n",
+           mai_cfg->tweak.aux_button_active_high ? "ON" : "OFF");
+}
+
+#define ARRAYSIZE(x) (sizeof(x) / sizeof(x[0]))
+
 void handle_display(int argc, char *argv[])
 {
-    const char *usage = "Usage: display [rgb|sense|hid|gpio|aime]\n";
+    const char *usage = "Usage: display [rgb|sense|hid|gpio|touch|aime|tweak]\n";
     if (argc > 1) {
         printf(usage);
         return;
     }
 
+    const char *choices[] = {"rgb", "sense", "hid", "gpio", "touch", "aime", "tweak"};
+    static void (*disp_funcs[])() = {
+        disp_rgb,
+        disp_sense,
+        disp_hid,
+        disp_gpio,
+        disp_touch,
+        disp_aime,
+        disp_tweak,
+    };
+  
+    static_assert(ARRAYSIZE(choices) == ARRAYSIZE(disp_funcs),
+        "Choices and disp_funcs arrays must have the same number of elements");
+
     if (argc == 0) {
-        disp_rgb();
-        disp_sense();
-        disp_hid();
-        disp_gpio();
-        disp_touch();
-        disp_aime();
+        for (int i = 0; i < ARRAYSIZE(disp_funcs); i++) {
+            disp_funcs[i]();
+        }
         return;
     }
 
-    const char *choices[] = {"rgb", "sense", "hid", "gpio", "touch", "aime"};
-    switch (cli_match_prefix(choices, 6, argv[0])) {
-        case 0:
-            disp_rgb();
-            break;
-        case 1:
-            disp_sense();
-            break;
-        case 2:
-            disp_hid();
-            break;
-        case 3:
-            disp_gpio();
-            break;
-        case 4:
-            disp_touch();
-            break;
-        case 5:
-            disp_aime();
-            break;
-        default:
-            printf(usage);
-            break;
+    int choice = cli_match_prefix(choices, ARRAYSIZE(choices), argv[0]);
+    if (choice < 0) {
+        printf(usage);
+        return;
     }
+
+    if (choice > ARRAYSIZE(disp_funcs)) {
+        return;
+    }
+
+    disp_funcs[choice]();
 }
 
 static void handle_rgb(int argc, char *argv[])
@@ -593,6 +602,42 @@ static void handle_aime(int argc, char *argv[])
     }
 }
 
+static void handle_tweak(int argc, char *argv[])
+{
+    const char *usage = "Usage: tweak <option> <on|off>\n"
+                        "Options:\n"
+                        "    main_button_active_high\n"
+                        "    aux_button_active_high\n";
+    if (argc != 2) {
+        printf(usage);
+        return;
+    }
+
+    const char *options[] = {
+        "main_button_active_high",
+        "aux_button_active_high",
+    };
+
+    const char *switches[] = { "on", "off" };
+
+    int option = cli_match_prefix(options, 2, argv[0]);
+    int on_off = cli_match_prefix(switches, 2, argv[1]);
+    if ((option < 0) || (on_off < 0)) {
+        printf(usage);
+        return;
+    }
+
+    bool active = on_off == 0 ? true : false;
+    if (option == 0) {
+        mai_cfg->tweak.main_button_active_high = active;
+    } else if (option == 1) {
+        mai_cfg->tweak.aux_button_active_high = active;
+    }
+
+    config_changed();
+    disp_tweak();
+}
+
 void commands_init()
 {
     cli_register("display", handle_display, "Display all config.");
@@ -608,6 +653,7 @@ void commands_init()
     cli_register("save", handle_save, "Save config to flash.");
     cli_register("gpio", handle_gpio, "Set GPIO pins for buttons.");
     cli_register("touch", handle_touch, "Custimze touch mapping.");
+    cli_register("tweak", handle_tweak, "Miscellaneous tweak options.");
     cli_register("factory", config_factory_reset, "Reset everything to default.");
     cli_register("aime", handle_aime, "AIME settings.");
 }

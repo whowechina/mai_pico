@@ -42,10 +42,19 @@ void button_init()
     }
 }
 
+static inline bool button_pressed(int id)
+{
+    bool reading = gpio_get(gpio_real[id]);
+    bool active_level = id < 8 ? mai_cfg->tweak.main_button_active_high :
+                                 mai_cfg->tweak.aux_button_active_high;
+
+    return reading == active_level;
+}
+
 bool button_is_stuck()
 {
     for (int i = 0; i < BUTTON_NUM; i++) {
-        if (!gpio_get(gpio_real[i])) {
+        if (button_pressed(i)) {
             return true;
         }
     }
@@ -83,7 +92,7 @@ void button_update()
     uint16_t buttons = 0;
 
     for (int i = BUTTON_NUM - 1; i >= 0; i--) {
-        bool sw_pressed = !gpio_get(gpio_real[i]);
+        bool sw_pressed = button_pressed(i);
         
         if (now >= sw_freeze_time[i]) {
             if (sw_pressed != sw_val[i]) {

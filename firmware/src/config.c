@@ -40,7 +40,11 @@ static mai_cfg_t default_cfg = {
     .aime = {
         .mode = 0,
         .virtual_aic = 0,
-    }
+    },
+    .tweak = {
+        .main_button_active_high = 0,
+        .aux_button_active_high = 0,
+    },
 };
 
 mai_runtime_t mai_runtime;

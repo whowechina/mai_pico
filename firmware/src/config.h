@@ -40,6 +40,13 @@ typedef struct __attribute__((packed)) {
         uint8_t mode : 4;
         uint8_t virtual_aic : 4;
     } aime;
+    struct {
+        uint8_t main_button_active_high : 1;
+        uint8_t aux_button_active_high : 1;
+        uint8_t unused_bits : 6;
+        uint8_t reserved[3];
+    } tweak;
+    uint8_t reserved[8];
 } mai_cfg_t;
 
 typedef struct {
