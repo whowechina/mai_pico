@@ -17,4 +17,5 @@ void cli_fps_count(int core);
 int cli_extract_non_neg_int(const char *param, int len);
 int cli_match_prefix(const char *str[], int num, const char *prefix);
 
+extern const char *built_time;
 #endif
