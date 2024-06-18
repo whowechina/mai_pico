@@ -37,12 +37,15 @@
 #include "io.h"
 #include "hid.h"
 
-static void run_lights()
+static void button_lights_clear()
 {
-    if (io_is_active() || aime_is_active()) {
-        return;
+    for (int i = 0; i < 8; i++) {
+        rgb_set_button(i, 0, 0);
     }
+}
 
+static void button_lights_rainbow()
+{
     static uint16_t loop = 0;
     loop++;
     uint16_t buttons = button_read();
@@ -56,6 +59,20 @@ static void run_lights()
         }
         rgb_set_button(i, color, 0);
     }
+}
+
+static void run_lights()
+{
+    static bool was_rainbow = true;
+    bool go_rainbow = !io_is_active() && !aime_is_active();
+
+    if (go_rainbow) {
+        button_lights_rainbow();
+    } else if (was_rainbow) {
+        button_lights_clear();
+    }
+
+    was_rainbow = go_rainbow;
 }
 
 
