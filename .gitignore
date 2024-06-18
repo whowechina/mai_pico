@@ -1,7 +1,5 @@
-PCB/Keyboard/iidx_teeny-backups/
-Production/PCB/Turntable
-Production/PCB/teeny_iidx
+Production/PCB/*/
+*-backups
 .editorconfig
 .vscode
-firmware/mai2/mai2hook
-PCB/IO/mai_io-backups
+

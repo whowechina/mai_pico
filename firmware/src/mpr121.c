@@ -157,8 +157,8 @@ static bool mpr121_read_many16(uint8_t addr, uint8_t reg, uint16_t *buf, size_t 
 
 uint16_t mpr121_touched(uint8_t addr)
 {
-    uint16_t touched;
-    mpr121_read_many16(addr, MPR121_TOUCH_STATUS_REG, &touched, 2);
+    uint16_t touched = 0;
+    mpr121_read_many16(addr, MPR121_TOUCH_STATUS_REG, &touched, 1);
     return touched;
 }
 
@@ -174,7 +174,7 @@ static uint8_t mpr121_stop(uint8_t addr)
     return ecr;
 }
 
-static uint8_t mpr121_resume(uint8_t addr, uint8_t ecr)
+static void mpr121_resume(uint8_t addr, uint8_t ecr)
 {
     write_reg(addr, MPR121_ELECTRODE_CONFIG_REG, ecr);
 }

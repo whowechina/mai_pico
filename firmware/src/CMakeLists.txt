@@ -1,8 +1,9 @@
-set(BTSTACK_ROOT ${PICO_SDK_PATH}/lib/btstack)
-set(LWIP_ROOT ${PICO_SDK_PATH}/lib/lwip)
+pico_sdk_init()
+
+include_directories(${CMAKE_CURRENT_LIST_DIR})
+add_compile_options(-Wall -Werror -Wfatal-errors -O3)
 
 function(make_firmware board board_def)
-    pico_sdk_init()
     add_executable(${board}
         main.c touch.c button.c rgb.c save.c config.c cli.c commands.c io.c hid.c
         mpr121.c usb_descriptors.c)
@@ -11,12 +12,7 @@ function(make_firmware board board_def)
     pico_enable_stdio_uart(${board} 0)
 
     pico_generate_pio_header(${board} ${CMAKE_CURRENT_LIST_DIR}/ws2812.pio)
-    
-    target_compile_options(${board} PRIVATE -Wfatal-errors -O3)
-    target_include_directories(${board} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
-    target_include_directories(${board} PRIVATE 
-                               ${BTSTACK_ROOT}/src
-                               ${LWIP_ROOT}/src/include)
+
     
     target_link_libraries(${board} PRIVATE
         aic

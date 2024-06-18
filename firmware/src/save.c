@@ -9,11 +9,10 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <memory.h>
 
-
-#include "bsp/board.h"
 #include "pico/bootrom.h"
 #include "pico/stdio.h"
 

@@ -47,7 +47,7 @@ static void report_usb_hid()
             uint16_t buttons = button_read();
             hid_joy.buttons[0] = native_to_io4(buttons);
             hid_joy.buttons[1] = native_to_io4(0);
-            if (last_buttons ^ buttons & (1 << 11)) {
+            if ((last_buttons ^ buttons) & (1 << 11)) {
                 if (buttons & (1 << 11)) {
                    // just pressed coin button
                    hid_joy.chutes[0] += 0x100;

@@ -27,11 +27,11 @@ static void disp_rgb()
     printf("[RGB]\n");
     printf("  Number per button: %d, number per aux: %d\n",
             mai_cfg->rgb.per_button, mai_cfg->rgb.per_aux);
-    printf("  Key on: %06x, off: %06x\n  Level: %d\n",
+    printf("  Key on: %06lx, off: %06lx\n  Level: %d\n",
            mai_cfg->color.key_on, mai_cfg->color.key_off, mai_cfg->color.level);
 }
 
-static void print_sense_zone(const char *title, const uint8_t *zones, int num)
+static void print_sense_zone(const char *title, const int8_t *zones, int num)
 {
     printf("   %s |", title);
     for (int i = 0; i < num; i++) {
@@ -276,7 +276,7 @@ static void handle_filter(int argc, char *argv[])
     disp_sense();
 }
 
-static uint8_t *extract_key(const char *param)
+static int8_t *extract_key(const char *param)
 {
     if (strlen(param) != 2) {
         return NULL;
@@ -319,7 +319,7 @@ static void handle_sense(int argc, char *argv[])
                         "  >sense +\n"
                         "  >sense -\n"
                         "  >sense A3 +\n"
-                        "  >sense C1 -\n";
+                        "  >sense C1 -\n"
                         "  >sense * 0\n";
     if ((argc < 1) || (argc > 2)) {
         printf(usage);
@@ -340,7 +340,7 @@ static void handle_sense(int argc, char *argv[])
                 sense_do_op(&mai_cfg->sense.zones[i], op[0]);
             }
         } else {
-            uint8_t *key = extract_key(argv[0]);
+            int8_t *key = extract_key(argv[0]);
             if (!key) {
                 printf(usage);
                 return;
