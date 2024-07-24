@@ -55,7 +55,25 @@ https://github.com/whowechina/
 ## 关于许可证
 它是 CC-NC 授权。所以你只能给自己和你的朋友 DIY，不能利用这个项目赚钱。
 
-## 如何构建
+
+## 制作集锦
+开始之前，我想给你看一些爱好者的作品，来鼓励你继续下去。
+
+### **Lavide 的作品**
+  Lavide 制作了一个漂亮的紧凑型一体化 Mai Pico 控制器！  
+  <img src="doc/lavide_1.jpg" width="30%"><img src="doc/lavide_2.jpg" width="30%"><img src="doc/lavide_3.jpg" width="21.65%">
+
+### **Romper 的作品**
+  Romper 利用 Mai Pico 的触摸设计制作了一个全尺寸的控制器。  
+  <img src="doc/romper_1.png" width="28%"><img src="doc/romper_2.jpg" width="50%">
+
+### **imfrea 的作品**
+  imfrea 给 Mai Pico 设计了一套平价又好看的的亚克力外壳。  
+  <img src="doc/imfrea_1.jpg" width="30%"><img src="doc/imfrea_2.jpg" width="30%">  
+  你可以从他的 fork 分支下载亚克力外壳设计。  
+  https://github.com/imfrea/mai_pico
+
+## 如何制作
 ### PCB
 * 去 JLCPCB 并使用 gerber zip 文件（最新的 `Production\PCB\mai_io_v*.zip` 和 `Production\PCB\mai_button_v*.zip`）下单，常规 FR-4 板，厚度 1.6mm。你需要 1x io PCB 和 8x 按钮 PCBs 来构建一个 Mai Pico con。  
   <img src="doc/pcbs.jpg" width="50%">
