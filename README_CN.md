@@ -60,7 +60,7 @@ https://github.com/whowechina/
 开始之前，我想给你看一些爱好者的作品，来鼓励你继续下去。
 
 ### **Lavide 的作品**
-  Lavide 制作了一个漂亮的紧凑型一体化 Mai Pico 控制器！  
+  Lavide 制作了一个漂亮的紧凑型一体化 Mai Pico 机框！  
   <img src="doc/lavide_1.jpg" width="30%"><img src="doc/lavide_2.jpg" width="30%"><img src="doc/lavide_3.jpg" width="21.65%">
 
 ### **Romper 的作品**
