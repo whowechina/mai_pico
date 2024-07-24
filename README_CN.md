@@ -68,7 +68,7 @@ https://github.com/whowechina/
   <img src="doc/romper_1.png" width="28%"><img src="doc/romper_2.jpg" width="50%">
 
 ### **imfrea 的作品**
-  imfrea 给 Mai Pico 设计了一套平价又好看的的亚克力外壳。  
+  imfrea 给 Mai Pico 设计了一套平价又好看的亚克力外壳。  
   <img src="doc/imfrea_1.jpg" width="30%"><img src="doc/imfrea_2.jpg" width="30%">  
   你可以从他的 fork 分支下载亚克力外壳设计。  
   https://github.com/imfrea/mai_pico
