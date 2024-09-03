@@ -68,6 +68,11 @@ Before we start, I want to encourage you with some hobbyist builds.
   You can download the acrylic case designs from his fork of Mai Pico here.  
   https://github.com/imfrea/mai_pico
 
+### ***IlIIllllIlIIlll's Build**
+  IlIIllllIlIIlll made another nice and compact housing.  
+  <img src="doc/IlIIllllIlIIlll_1.jpg" width="25%"> <img src="doc/IlIIllllIlIIlll_2.jpg" width="25%"> <img src="doc/IlIIllllIlIIlll_3.jpg" width="13%"> <img src="doc/IlIIllllIlIIlll_4.jpg" width="25%">  
+  Thanks to his/her contribution, you can download the design files directly from this repository. It's located at `Production\3rdparty\IlIIllllIlIIlll_housing.zip`. The panel can be cut from PP or acrylic sheets, and other parts can be 3D printed. Plase note that this design is also not for commercial use.
+
 ## HOW TO BUILD
 ### PCB
 * Go JLCPCB and make order with the gerber zip file (latest `Production\PCB\mai_io_v*.zip` and `Production\PCB\mai_button_v*.zip`), regular FR-4 board, 1.6mm thickness. You need 1x io PCB and 8x button PCBs for one Mai Pico con.  

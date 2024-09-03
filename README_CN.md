@@ -73,6 +73,11 @@ https://github.com/whowechina/
   你可以从他的 fork 分支下载亚克力外壳设计。  
   https://github.com/imfrea/mai_pico
 
+### **IlIIllllIlIIlll 的作品**
+  IlIIllllIlIIlll 也制作了一套外壳。  
+  <img src="doc/IlIIllllIlIIlll_1.jpg" width="25%"> <img src="doc/IlIIllllIlIIlll_2.jpg" width="25%"> <img src="doc/IlIIllllIlIIlll_3.jpg" width="13%"> <img src="doc/IlIIllllIlIIlll_4.jpg" width="25%">  
+  感谢他/她的贡献，你可以从这个仓库下载到他的这套设计文件，位置在 `Production\3rdparty\IlIIllllIlIIlll_housing.zip`。面板可以用 PP 或者亚克力材料切割，其他部位可以用 3D 打印。请注意，这套设计也不可商用。  
+
 ## 如何制作
 ### PCB
 * 去 JLCPCB 并使用 gerber zip 文件（最新的 `Production\PCB\mai_io_v*.zip` 和 `Production\PCB\mai_button_v*.zip`）下单，常规 FR-4 板，厚度 1.6mm。你需要 1x io PCB 和 8x 按钮 PCBs 来构建一个 Mai Pico con。  
