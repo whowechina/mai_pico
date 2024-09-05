@@ -11,7 +11,11 @@
 * Built-in AIME support.
 * All source files open.
 
-Thanks to many respectful guys/companies who made their tools or materials free or open source (KiCad, OnShape, InkScape, Raspberry things, JLCPCB).
+Thanks to many respectful guys/companies who made their tools or materials free or open source (KiCad, OnShape, InkScape, Raspberry things, JLCPCB), and also:
+* RP_Silicon_KiCad: https://github.com/HeadBoffin/RP_Silicon_KiCad
+* Switch_Keyboard_Kailh: https://github.com/kiswitch/keyswitch-kicad-library
+* Type-C: https://github.com/ai03-2725/Type-C.pretty
+* Mai2Touch: https://github.com/Sucareto/Mai2Touch
 
 ## Notes
 This project is the most complex one among all my projects.

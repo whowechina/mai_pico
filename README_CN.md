@@ -13,7 +13,11 @@
 * 内置支持 AIME。
 * 所有源文件开放。
 
-感谢许多尊敬的爱好者和公司将他们的工具或材料免费或开源（KiCad，OnShape，InkScape，Raspberry 相关工具, 嘉立创）。
+感谢许多尊敬的爱好者和公司将他们的工具或材料免费或开源（KiCad，OnShape，InkScape，Raspberry 相关工具, 嘉立创），还有这些：
+* RP_Silicon_KiCad: https://github.com/HeadBoffin/RP_Silicon_KiCad
+* Switch_Keyboard_Kailh: https://github.com/kiswitch/keyswitch-kicad-library
+* Type-C: https://github.com/ai03-2725/Type-C.pretty
+* Mai2Touch: https://github.com/Sucareto/Mai2Touch
 
 ## 注意事项
 这个项目是我众多项目里最复杂的一个。
