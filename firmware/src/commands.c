@@ -22,6 +22,8 @@
 #define SENSE_LIMIT_MAX 9
 #define SENSE_LIMIT_MIN -9
 
+static uint8_t touch_map[] = TOUCH_MAP;
+
 static void disp_rgb()
 {
     printf("[RGB]\n");
@@ -395,30 +397,44 @@ static void handle_debounce(int argc, char *argv[])
     disp_sense();
 }
 
-static void print_raw_zones(const char *title, const uint16_t *raw, int num)
+static void print_readings(const char *title, const uint16_t *raw, int num)
 {
     printf(" %s |", title);
     for (int i = 0; i < num; i++) {
-        printf(" %3d |", raw[i]);
+        printf(" %4d |", raw[i]);
     }
     printf("\n");
 }
 
 static void handle_raw()
 {
+    static uint16_t zones[36] = {0};
+
     printf("Touch raw readings:\n");
     const uint16_t *raw = touch_raw();
+
+    for (int i = 0; i < 34; i++) {
+        zones[touch_map[i]] = raw[i];
+    }
+
     printf("   Sensor: 0: %s, 1: %s 2: %s\n",
             touch_sensor_ok(0) ? "OK" : "ERR",
             touch_sensor_ok(1) ? "OK" : "ERR",
             touch_sensor_ok(2) ? "OK" : "ERR");
+    
+    printf("   Sensor readings:\n");
+    printf("   |___1__|___2__|___3__|___4__|___5__|___6__|___7__|___8__|___9__|__10__|__11__|__12__|\n");
+    print_readings("0", raw, 12);
+    print_readings("1", raw + 12, 12);
+    print_readings("2", raw + 24, 12);
 
-    printf("   |__1__|__2__|__3__|__4__|__5__|__6__|__7__|__8__|\n");
-    print_raw_zones("A", raw, 8);
-    print_raw_zones("B", raw + 8, 8);
-    print_raw_zones("C", raw + 16, 2);
-    print_raw_zones("D", raw + 18, 8);
-    print_raw_zones("E", raw + 26, 8);
+    printf("   Zone readings:\n");
+    printf("   |___1__|___2__|___3__|___4__|___5__|___6__|___7__|___8__|\n");
+    print_readings("A", zones, 8);
+    print_readings("B", zones + 8, 8);
+    print_readings("C", zones + 16, 2);
+    print_readings("D", zones + 18, 8);
+    print_readings("E", zones + 26, 8);
 }
 
 static void handle_whoami()
