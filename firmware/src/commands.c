@@ -22,8 +22,6 @@
 #define SENSE_LIMIT_MAX 9
 #define SENSE_LIMIT_MIN -9
 
-static uint8_t touch_map[] = TOUCH_MAP;
-
 static void disp_rgb()
 {
     printf("[RGB]\n");
@@ -408,14 +406,10 @@ static void print_readings(const char *title, const uint16_t *raw, int num)
 
 static void handle_raw()
 {
-    static uint16_t zones[36] = {0};
+    const uint16_t *raw = touch_raw();
+    const uint16_t *zones = map_raw_to_zones(raw);
 
     printf("Touch raw readings:\n");
-    const uint16_t *raw = touch_raw();
-
-    for (int i = 0; i < 34; i++) {
-        zones[touch_map[i]] = raw[i];
-    }
 
     printf("   Sensor: 0: %s, 1: %s 2: %s\n",
             touch_sensor_ok(0) ? "OK" : "ERR",
