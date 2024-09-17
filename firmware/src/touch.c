@@ -167,7 +167,8 @@ const uint16_t *touch_raw()
     return readout;
 }
 
-const uint16_t *map_raw_to_zones(uint16_t* raw) {
+const uint16_t *map_raw_to_zones(const uint16_t* raw)
+{
     static uint16_t zones[36];
 
     for (int i = 0; i < 34; i++) {

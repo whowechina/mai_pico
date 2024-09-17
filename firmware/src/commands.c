@@ -395,11 +395,11 @@ static void handle_debounce(int argc, char *argv[])
     disp_sense();
 }
 
-static void print_readings(const char *title, const uint16_t *raw, int num)
+static void print_readings(const char *title, const uint16_t *readings, int num)
 {
     printf(" %s |", title);
     for (int i = 0; i < num; i++) {
-        printf(" %4d |", raw[i]);
+        printf(" %4d |", readings[i]);
     }
     printf("\n");
 }
@@ -416,13 +416,13 @@ static void handle_raw()
             touch_sensor_ok(1) ? "OK" : "ERR",
             touch_sensor_ok(2) ? "OK" : "ERR");
     
-    printf("   Sensor readings:\n");
+    printf("   By Sensor:\n");
     printf("   |___1__|___2__|___3__|___4__|___5__|___6__|___7__|___8__|___9__|__10__|__11__|__12__|\n");
     print_readings("0", raw, 12);
     print_readings("1", raw + 12, 12);
     print_readings("2", raw + 24, 12);
 
-    printf("   Zone readings:\n");
+    printf("   By Zone:\n");
     printf("   |___1__|___2__|___3__|___4__|___5__|___6__|___7__|___8__|\n");
     print_readings("A", zones, 8);
     print_readings("B", zones + 8, 8);
