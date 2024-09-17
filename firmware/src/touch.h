@@ -29,6 +29,7 @@ uint64_t touch_touchmap();
 void touch_set_map(unsigned sensor, unsigned key);
 
 const uint16_t *touch_raw();
+const uint16_t *map_raw_to_zones(uint16_t *raw);
 bool touch_sensor_ok(unsigned i);
 
 void touch_update_config();
