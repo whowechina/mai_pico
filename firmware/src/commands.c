@@ -61,10 +61,10 @@ static void disp_hid()
 {
     printf("[HID]\n");
     const char *nkro[] = {"off", "key1", "key2"};
-    printf("  Joy: %s, NKRO: %s\n", mai_cfg->hid.joy ? "ON" : "OFF",
+    printf("  IO4: %s, NKRO: %s\n", mai_cfg->hid.io4 ? "on" : "off",
            mai_cfg->hid.nkro <= 2 ? nkro[mai_cfg->hid.nkro] : "key1");
     if (mai_runtime.key_stuck) {
-        printf("  !!! Button stuck, force JOY only !!!\n");
+        printf("  !!! Button stuck, force IO4 only !!!\n");
     }
 }
 
@@ -221,32 +221,35 @@ static void handle_stat(int argc, char *argv[])
 
 static void handle_hid(int argc, char *argv[])
 {
-    const char *usage = "Usage: hid <joy|key1|key2>\n";
+    const char *usage = "Usage: hid <io4|key1|key2|off>\n";
     if (argc != 1) {
         printf(usage);
         return;
     }
 
-    const char *choices[] = {"joy", "key1", "key2"};
-    int match = cli_match_prefix(choices, 3, argv[0]);
+    const char *choices[] = {"io4", "key1", "key2", "off"};
+    int match = cli_match_prefix(choices, count_of(choices), argv[0]);
     if (match < 0) {
         printf(usage);
         return;
     }
 
     switch (match) {
-            break;
         case 1:
-            mai_cfg->hid.joy = 0;
+            mai_cfg->hid.io4 = 0;
             mai_cfg->hid.nkro = 1;
             break;
         case 2:
-            mai_cfg->hid.joy = 0;
+            mai_cfg->hid.io4 = 0;
             mai_cfg->hid.nkro = 2;
+            break;
+        case 3:
+            mai_cfg->hid.io4 = 0;
+            mai_cfg->hid.nkro = 0;
             break;
         case 0:
         default:
-            mai_cfg->hid.joy = 1;
+            mai_cfg->hid.io4 = 1;
             mai_cfg->hid.nkro = 0;
             break;
     }

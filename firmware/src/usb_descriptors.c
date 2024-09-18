@@ -157,13 +157,15 @@ uint8_t const* tud_descriptor_configuration_cb(uint8_t index) {
 
 static char serial_number_str[24] = "123456\0";
 
+static char joy_name_string[128] = "I/O CONTROL BD;15257;01;90;1831;6679A;00;GOUT=14_ADIN=8,E_ROTIN=4_COININ=2_SWIN=2,E_UQ1=41,6;";
+
 // array of pointer to string descriptors
 static const char *string_desc_arr[] = {
     (const char[]){0x09, 0x04},  // 0: is supported language is English (0x0409)
     "SEGA", // 1: Manufacturer
     "Mai Pico", // 2: Product
     serial_number_str, // 3: Serials, use chip ID
-    "I/O CONTROL BD;15257;01;90;1831;6679A;00;GOUT=14_ADIN=8,E_ROTIN=4_COININ=2_SWIN=2,E_UQ1=41,6;",
+    joy_name_string,
     "Mai Pico NKRO",
     "Mai Pico Command Line Port",
     "Mai Pico Touch Port",
@@ -205,4 +207,9 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid)
     _desc_str[0] = (TUSB_DESC_STRING << 8) | (2 * chr_count + 2);
 
     return _desc_str;
+}
+
+void usb_descriptors_disable_io4()
+{
+    strcpy(joy_name_string, "Mai Pico Joystick");
 }

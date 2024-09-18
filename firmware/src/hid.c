@@ -42,7 +42,7 @@ static uint16_t native_to_io4(uint16_t button)
 static void report_usb_hid()
 {
     if (tud_hid_ready()) {
-        if (mai_cfg->hid.joy || mai_runtime.key_stuck) {
+        if (mai_cfg->hid.io4 || mai_runtime.key_stuck) {
             static uint16_t last_buttons = 0;
             uint16_t buttons = button_read();
             hid_joy.buttons[0] = native_to_io4(buttons);

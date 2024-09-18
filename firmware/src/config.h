@@ -25,7 +25,7 @@ typedef struct __attribute__((packed)) {
         int8_t zones[34];
     } sense;
     struct {
-        uint8_t joy : 4;
+        uint8_t io4 : 4;
         uint8_t nkro : 4;
     } hid;
     struct {

@@ -148,4 +148,5 @@ enum {
 
 //        HID_REPORT_ID(REPORT_ID_NKRO) 
 
+void usb_descriptors_disable_io4();
 #endif /* USB_DESCRIPTORS_H_ */

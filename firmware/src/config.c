@@ -26,8 +26,8 @@ static mai_cfg_t default_cfg = {
         .debounce_release = 2,
      },
     .hid = {
-        .joy = 0,
-        .nkro = 1,
+        .io4 = 1,
+        .nkro = 0,
     },
     .rgb = {
         .per_button = 1,

@@ -145,6 +145,10 @@ void init()
 
     save_init(board_id_32() ^ 0xcafe1111, &core1_io_lock);
 
+    if (!mai_cfg->hid.io4) {
+        usb_descriptors_disable_io4();
+    }
+
     touch_init();
     button_init();
     rgb_init();
