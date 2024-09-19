@@ -26,7 +26,8 @@ function(make_firmware board board_def)
     COMMAND touch ${CMAKE_CURRENT_SOURCE_DIR}/cli.c)
 
     add_custom_command(TARGET ${board} POST_BUILD
-                       COMMAND cp ${board}.uf2 ${CMAKE_CURRENT_LIST_DIR}/..)
+                       COMMAND ${CMAKE_COMMAND}
+                       ARGS -E copy ${board}.uf2 ${CMAKE_CURRENT_LIST_DIR}/..)
 endfunction()
 
 make_firmware(mai_pico BOARD_MAI_PICO)
