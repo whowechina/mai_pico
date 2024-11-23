@@ -49,7 +49,7 @@ I made this project in my personal time with no financial benefit or sponsorship
 ## About the License
 It's CC-NC. So DIY for yourself and for your friend, don't make money from it. And plagiarism that doesn’t even dare to mention the original author is not acceptable. Plase note that pooling orders and group buying for raw materials is acceptable. Selling off any leftover components without profit is also acceptable.
 
-If you're interested in buying from me, or some kind of commercial use, please contact me (Discord, QQ group, Wechat group or leave your contact in issue section).
+If you're interested in buying from me, or for commercial use, please contact me (Discord, QQ group, Wechat group or leave your contact in issue section).
 
 ## My Discord Invitation
 https://discord.gg/M8f2PPQFEA
