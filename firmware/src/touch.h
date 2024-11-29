@@ -23,6 +23,7 @@ int touch_key_channel(unsigned key);
 unsigned touch_key_from_channel(unsigned channel);
 
 void touch_init();
+void touch_sensor_init();
 void touch_update();
 bool touch_touched(unsigned key);
 uint64_t touch_touchmap();

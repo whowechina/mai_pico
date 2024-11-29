@@ -13,6 +13,7 @@
 #include "pico/multicore.h"
 #include "pico/bootrom.h"
 
+#include "hardware/clocks.h"
 #include "hardware/gpio.h"
 #include "hardware/sync.h"
 #include "hardware/structs/ioqspi.h"
@@ -108,6 +109,28 @@ static void core1_loop()
     }
 }
 
+static void runtime_ctrl()
+{
+    /* Just use long-press COIN to reset touch in runtime */
+    static bool applied = false;
+    static uint64_t press_time = 0;
+    static bool last_coin_button = false;
+    bool coin_button = button_read() & (1 << 11);
+
+    if (coin_button) {
+        if (!last_coin_button) {
+            press_time = time_us_64();
+            applied = false;
+        }
+        if (!applied && (time_us_64() - press_time > 2000000)) {
+            touch_sensor_init();
+            applied = true;
+        }
+    }
+
+    last_coin_button = coin_button;
+}
+
 static void core0_loop()
 {
     uint64_t next_frame = time_us_64();
@@ -127,6 +150,7 @@ static void core0_loop()
         touch_update();
         button_update();
 
+        runtime_ctrl();
         hid_update();
     }
 }

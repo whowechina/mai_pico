@@ -26,6 +26,14 @@ static unsigned touch_counts[36];
 
 static uint8_t touch_map[] = TOUCH_MAP;
 
+void touch_sensor_init()
+{
+    for (int m = 0; m < 3; m++) {
+        mpr121_init(MPR121_BASE_ADDR + m);
+    }
+    touch_update_config();
+}
+
 void touch_init()
 {
     i2c_init(I2C_PORT, I2C_FREQ);
@@ -33,11 +41,8 @@ void touch_init()
     gpio_set_function(I2C_SCL, GPIO_FUNC_I2C);
     gpio_pull_up(I2C_SDA);
     gpio_pull_up(I2C_SCL);
-    
-    for (int m = 0; m < 3; m++) {
-        mpr121_init(MPR121_BASE_ADDR + m);
-    }
-    touch_update_config();
+
+    touch_sensor_init();    
     memcpy(touch_map, mai_cfg->alt.touch, sizeof(touch_map));
 }
 
