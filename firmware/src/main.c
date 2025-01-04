@@ -145,7 +145,7 @@ static void core0_loop()
         cli_fps_count(0);
 
         sleep_until(next_frame);
-        next_frame += 1000; // 1KHz
+        next_frame += 1001; // slightly lower than 1KHz
 
         touch_update();
         button_update();
