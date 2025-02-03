@@ -1,8 +1,7 @@
 /*
- * Chu Pico Silder Keys
+ * Mai Pico Touch Keys
  * WHowe <github.com/whowechina>
  * 
- * MPR121 CapSense based Keys
  */
 
 #include "touch.h"

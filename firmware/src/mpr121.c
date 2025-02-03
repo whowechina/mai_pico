@@ -1,5 +1,5 @@
 /*
- * MP121 Captive Touch Sensor
+ * MPR121 Captive Touch Sensor
  * WHowe <github.com/whowechina>
  *
  */

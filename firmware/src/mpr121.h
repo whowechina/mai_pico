@@ -1,11 +1,11 @@
 /*
- * MP121 Captive Touch Sensor
+ * MPR121 Captive Touch Sensor
  * WHowe <github.com/whowechina>
  * 
  */
 
-#ifndef MP121_H
-#define MP121_H
+#ifndef MPR121_H
+#define MPR121_H
 
 #define MPR121_BASE_ADDR 0x5A
 

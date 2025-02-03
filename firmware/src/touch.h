@@ -1,10 +1,10 @@
 /*
- * Chu Pico Silder Keys
+ * Mai Pico Touch Keys
  * WHowe <github.com/whowechina>
  */
 
-#ifndef Silder_H
-#define Silder_H
+#ifndef TOUCH_H
+#define TOUCH_H
 
 #include <stdint.h>
 #include <stdbool.h>
