@@ -25,8 +25,8 @@
 static void disp_rgb()
 {
     printf("[RGB]\n");
-    printf("  Number per button: %d, number per aux: %d\n",
-            mai_cfg->rgb.per_button, mai_cfg->rgb.per_aux);
+    printf("  Number per button: %d, number per cab: %d\n",
+            mai_cfg->rgb.per_button, mai_cfg->rgb.per_cab);
     printf("  Key on: %06lx, off: %06lx\n  Level: %d\n",
            mai_cfg->color.key_on, mai_cfg->color.key_off, mai_cfg->color.level);
 }
@@ -157,22 +157,21 @@ void handle_display(int argc, char *argv[])
 
 static void handle_rgb(int argc, char *argv[])
 {
-    const char *usage = "Usage: rgb <1..16> <1..16>\n";
+    const char *usage = "Usage: rgb <1..16> <0..128>\n";
     if (argc != 2) {
         printf(usage);
         return;
     }
 
     int per_button = cli_extract_non_neg_int(argv[0], 0);
-    int per_aux = cli_extract_non_neg_int(argv[1], 0);    
-    if ((per_button < 1) || (per_button > 16) ||
-        (per_aux < 1) || (per_aux > 16)) {
+    int per_cab = cli_extract_non_neg_int(argv[1], 0);    
+    if ((per_button < 1) || (per_button > 16) || (per_cab > 128)) {
         printf(usage);
         return;
     }
 
     mai_cfg->rgb.per_button = per_button;
-    mai_cfg->rgb.per_aux = per_aux;
+    mai_cfg->rgb.per_cab = per_cab;
 
     config_changed();
     disp_rgb();

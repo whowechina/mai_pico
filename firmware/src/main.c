@@ -74,6 +74,8 @@ static void run_lights()
     }
 
     was_rainbow = go_rainbow;
+
+    rgb_set_aime(aime_led_color());
 }
 
 const int aime_intf = 3;

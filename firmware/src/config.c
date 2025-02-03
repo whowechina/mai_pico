@@ -31,7 +31,7 @@ static mai_cfg_t default_cfg = {
     },
     .rgb = {
         .per_button = 1,
-        .per_aux = 1,
+        .per_cab = 1,
     },
     .alt = {
         .buttons = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
@@ -96,7 +96,7 @@ static void config_loaded()
     }
 
     if (!in_range(mai_cfg->rgb.per_button, 1, 16) ||
-        !in_range(mai_cfg->rgb.per_aux, 1, 16)) {
+        !in_range(mai_cfg->rgb.per_cab, 0, 128)) {
         mai_cfg->rgb = default_cfg.rgb;
         config_changed();
     }

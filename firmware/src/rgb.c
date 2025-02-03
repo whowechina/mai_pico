@@ -20,15 +20,15 @@
 #include "board_defs.h"
 #include "config.h"
 
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
-
-uint32_t rgb_buf[20];
+#define LED_NUM 12 // 8 buttons, 3 cab, 1 aime
+uint32_t rgb_buf[LED_NUM];
 static struct {
     uint32_t color; // current color
     uint32_t target; // target color
     uint16_t duration;
     uint16_t elapsed;
-} fade_ctx[20];
+} fade_ctx[LED_NUM];
+
 static const uint8_t button_led_map[] = RGB_BUTTON_MAP;
 
 #define _MAP_LED(x) _MAKE_MAPPER(x)
@@ -117,8 +117,8 @@ static void drive_led()
     }
     last = now;
 
-    for (int i = 0; i < ARRAY_SIZE(rgb_buf); i++) {
-        int num = (i < 8) ? mai_cfg->rgb.per_button : mai_cfg->rgb.per_aux;
+    for (int i = 0; i < LED_NUM; i++) {
+        int num = i < 8 ? mai_cfg->rgb.per_button : (i < 11 ? mai_cfg->rgb.per_cab : 16);
         for (int j = 0; j < num; j++) {
             pio_sm_put_blocking(pio0, 0, rgb_buf[i] << 8u);
         }
@@ -148,7 +148,7 @@ static void fade_ctrl()
         return;
     }
 
-    for (int i = 0; i < ARRAY_SIZE(fade_ctx); i++) {
+    for (int i = 0; i < count_of(fade_ctx); i++) {
         if (fade_ctx[i].duration == 0) {
             continue;
         }
@@ -170,7 +170,7 @@ static void fade_ctrl()
 
 static void set_color(unsigned index, uint32_t color, uint8_t speed)
 {
-    if (index >= ARRAY_SIZE(fade_ctx)) {
+    if (index >= count_of(fade_ctx)) {
         return;
     }
 
@@ -187,7 +187,7 @@ static void set_color(unsigned index, uint32_t color, uint8_t speed)
 
 void rgb_set_button(unsigned index, uint32_t color, uint8_t speed)
 {
-    if (index >= ARRAY_SIZE(button_led_map)) {
+    if (index >= 8) {
         return;
     }
     set_color(button_led_map[index], color, speed);
@@ -199,6 +199,11 @@ void rgb_set_cab(unsigned index, uint32_t color)
         return;
     }
     set_color(8 + index, color, 0);
+}
+
+void rgb_set_aime(uint32_t color)
+{
+    set_color(11, color, 0);
 }
 
 void rgb_init()
