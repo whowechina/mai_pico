@@ -259,9 +259,10 @@ static void handle_hid(int argc, char *argv[])
 static void handle_filter(int argc, char *argv[])
 {
     const char *usage = "Usage: filter <first> <second> [interval]\n"
-                        "    first: First iteration [0..3]\n"
-                        "   second: Second iteration [0..3]\n"
-                        " interval: Interval of second iterations [0..7]\n";
+                        "Adjusts MPR121 noise filtering parameters (see datasheets).\n"
+                        "    first:    First Filter Iterations  (FFI) [0..3]\n"
+                        "    second:   Second Filter Iterations (SFI) [0..3]\n"
+                        "    interval: Electrode Sample Interval (ESI) [0..7]\n";
     if ((argc < 2) || (argc > 3)) {
         printf(usage);
         return;
