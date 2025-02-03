@@ -569,7 +569,7 @@ static bool handle_aime_mode(const char *mode)
     } else {
         return false;
     }
-    aime_set_mode(mai_cfg->aime.mode);
+    aime_sub_mode(mai_cfg->aime.mode);
     config_changed();
     return true;
 }

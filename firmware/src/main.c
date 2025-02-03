@@ -180,7 +180,7 @@ void init()
     nfc_attach_i2c(I2C_PORT);
     nfc_init();
     aime_init(cdc_aime_putc);
-    aime_set_mode(mai_cfg->aime.mode);
+    aime_sub_mode(mai_cfg->aime.mode);
     aime_virtual_aic(mai_cfg->aime.virtual_aic);
 
     cli_init("mai_pico>", "\n   << Mai Pico Controller >>\n"
