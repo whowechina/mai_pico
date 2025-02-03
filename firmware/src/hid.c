@@ -17,12 +17,12 @@ struct __attribute__((packed)) {
     uint8_t system_status;
     uint8_t usb_status;
     uint8_t padding[29];
-} hid_joy;
+} hid_io4, sent_hid_io4;
 
 struct __attribute__((packed)) {
     uint8_t modifier;
     uint8_t keymap[15];
-} hid_nkro;
+} hid_nkro, sent_hid_nkro;
 
 static uint16_t native_to_io4(uint16_t button)
 {
@@ -39,27 +39,19 @@ static uint16_t native_to_io4(uint16_t button)
     return io4btn;
 }
 
-static void report_usb_hid()
+static void gen_io4_report()
 {
-    if (tud_hid_ready()) {
-        if (mai_cfg->hid.io4 || mai_runtime.key_stuck) {
-            static uint16_t last_buttons = 0;
-            uint16_t buttons = button_read();
-            hid_joy.buttons[0] = native_to_io4(buttons);
-            hid_joy.buttons[1] = native_to_io4(0);
-            if ((last_buttons ^ buttons) & (1 << 11)) {
-                if (buttons & (1 << 11)) {
-                   // just pressed coin button
-                   hid_joy.chutes[0] += 0x100;
-                }
-            }
-            tud_hid_n_report(0, REPORT_ID_JOYSTICK, &hid_joy, sizeof(hid_joy));
-            last_buttons = buttons;
-        }
-        if (mai_cfg->hid.nkro && !mai_runtime.key_stuck) {
-            tud_hid_n_report(1, 0, &hid_nkro, sizeof(hid_nkro));
+    static uint16_t last_buttons = 0;
+    uint16_t buttons = button_read();
+    hid_io4.buttons[0] = native_to_io4(buttons);
+    hid_io4.buttons[1] = native_to_io4(0);
+    if ((last_buttons ^ buttons) & (1 << 11)) {
+        if (buttons & (1 << 11)) {
+            // just pressed coin button
+            hid_io4.chutes[0] += 0x100;
         }
     }
+    last_buttons = buttons;
 }
 
 const char keymap_p1[] = BUTTON_NKRO_MAP_P1;
@@ -67,10 +59,6 @@ const char keymap_p2[] = BUTTON_NKRO_MAP_P2;
 
 static void gen_nkro_report()
 {
-    if (!mai_cfg->hid.nkro) {
-        return;
-    }
-
     uint16_t buttons = button_read();
     const char *keymap = (mai_cfg->hid.nkro == 2) ? keymap_p2 : keymap_p1;
     for (int i = 0; i < button_num(); i++) {
@@ -87,8 +75,25 @@ static void gen_nkro_report()
 
 void hid_update()
 {
-    gen_nkro_report();
-    report_usb_hid();
+    if (!tud_hid_ready()) {
+        return;
+    }
+
+    if (mai_cfg->hid.io4) {
+        gen_io4_report();
+        if ((memcmp(&hid_io4, &sent_hid_io4, sizeof(hid_io4)) != 0) &&
+            tud_hid_report(REPORT_ID_JOYSTICK, &hid_io4, sizeof(hid_io4))) {
+            sent_hid_io4 = hid_io4;
+        }
+    }
+
+    if (mai_cfg->hid.nkro && !mai_runtime.key_stuck) {
+        gen_nkro_report();
+        if ((memcmp(&hid_nkro, &sent_hid_nkro, sizeof(hid_nkro)) != 0) &&
+            tud_hid_n_report(1, 0, &hid_nkro, sizeof(hid_nkro))) {
+            sent_hid_nkro = hid_nkro;
+        }
+    }
 }
 
 typedef struct __attribute__((packed)) {
@@ -104,12 +109,12 @@ void hid_proc(const uint8_t *data, uint8_t len)
         switch (output->cmd) {
             case 0x01: // Set Timeout
             case 0x02: // Set Sampling Count
-                hid_joy.system_status = 0x30;
+                hid_io4.system_status = 0x30;
                 break;
             case 0x03: // Clear Board Status
-                hid_joy.chutes[0] = 0;
-                hid_joy.chutes[1] = 0;
-                hid_joy.system_status = 0x00;
+                hid_io4.chutes[0] = 0;
+                hid_io4.chutes[1] = 0;
+                hid_io4.system_status = 0x00;
                 break;
             case 0x04: // Set General Output
             case 0x41: // I don't know what this is

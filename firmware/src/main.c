@@ -76,7 +76,6 @@ static void run_lights()
     was_rainbow = go_rainbow;
 }
 
-
 const int aime_intf = 3;
 static void cdc_aime_putc(uint8_t byte)
 {
@@ -95,6 +94,7 @@ static void aime_run()
         }
     }
 }
+
 static mutex_t core1_io_lock;
 static void core1_loop()
 {
@@ -145,7 +145,7 @@ static void core0_loop()
         cli_fps_count(0);
 
         sleep_until(next_frame);
-        next_frame += 1001; // slightly lower than 1KHz
+        next_frame += 1000;
 
         touch_update();
         button_update();
