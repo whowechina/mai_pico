@@ -10,6 +10,8 @@
 
 #define IO_TIMEOUT_SEC 300
 
+#define DEBUG(x, ...) { if (mai_runtime.debug.x) { printf(__VA_ARGS__); } }
+
 static struct {
     bool stat;
     uint64_t last_io_time;
@@ -103,18 +105,18 @@ static void touch_cmd(cdc_t *cdc)
 
     switch (cdc->buf[2]) {
         case 'E':
-            printf("Touch RSET\n");
+            DEBUG(touch, "Touch RSET\n");
             break;
         case 'L':
-            printf("Touch HALT\n");
+            DEBUG(touch, "Touch HALT\n");
             ctx.stat = false;
             break;
         case 'A':
-            printf("Touch STAT\n");
+            DEBUG(touch, "Touch STAT\n");
             ctx.stat = true;
             break;
         case 'r':
-            //printf("Touch Ratio\n");
+            DEBUG(touch, "Touch Ratio\n");
             tud_cdc_n_write_char(cdc->interface, '(');
             tud_cdc_n_write_char(cdc->interface, cdc->buf[0]); //L,R
             tud_cdc_n_write_char(cdc->interface, cdc->buf[1]); //sensor
@@ -124,7 +126,7 @@ static void touch_cmd(cdc_t *cdc)
             tud_cdc_n_write_flush(cdc->interface);
             break;
         case 'k':
-            // printf("Touch Sense\n");
+            DEBUG(touch, "Touch Sense\n");
             tud_cdc_n_write_char(cdc->interface, '(');
             tud_cdc_n_write_char(cdc->interface, cdc->buf[0]); //L,R
             tud_cdc_n_write_char(cdc->interface, cdc->buf[1]); //sensor
@@ -134,7 +136,7 @@ static void touch_cmd(cdc_t *cdc)
             tud_cdc_n_write_flush(cdc->interface);
             break;
         default:
-            printf("Touch CMD Unknown: %*s -> ", 4, cdc->buf);
+            DEBUG(touch, "Touch CMD Unknown: %*s -> ", 4, cdc->buf);
             return;
     }
 }
@@ -221,7 +223,7 @@ static void led_cmd(cdc_t *cdc)
     uint32_t color;
     switch (cdc->hdr.cmd) {
         case 0x10:
-            printf("LED RSET\n");
+            DEBUG(led, "LED RSET\n");
             for (int i = 0; i < 8; i++) {
                 rgb_set_button(i, 0, 0);
             }
@@ -231,25 +233,25 @@ static void led_cmd(cdc_t *cdc)
             break;
         case 0x31:
             color = rgb32(cdc->led.r, cdc->led.g, cdc->led.b, false);
-            //printf("LED %d:1 %06x\n", cdc->led.index, color);
+            DEBUG(led, "LED %d:1 %06lx\n", cdc->led.index, color);
             rgb_set_button(cdc->led.index, color, 0);          
             break;
         case 0x32:
             color = rgb32(cdc->led.mr, cdc->led.mg, cdc->led.mb, false);
-            //printf("LED %d:%d %06x\n", cdc->led.start, cdc->led.len, color, cdc->led.mb);
+            DEBUG(led, "LED %d:%d %06lx\n", cdc->led.start, cdc->led.len, color);
             for (int i = 0; i < cdc->led.len; i++) {
                 rgb_set_button(i + cdc->led.start, color, 0);
             }
             break;
         case 0x33:
             color = rgb32(cdc->led.mr, cdc->led.mg, cdc->led.mb, false);
-            //printf("LED %d:%d %06x %d\n", cdc->led.start, cdc->led.len, color, cdc->led.speed);
+            DEBUG(led, "LED %d:%d %06lx %d\n", cdc->led.start, cdc->led.len, color, cdc->led.speed);
             for (int i = 0; i < cdc->led.len; i++) {
                 rgb_set_button(i + cdc->led.start, color, cdc->led.speed);
             }
             break;
         case 0x39:
-            //printf("LED Fet\n");
+            DEBUG(led, "LED Fet\n");
             rgb_set_cab(0, gray32(cdc->led.body, false));
             rgb_set_cab(1, gray32(cdc->led.ext, false));
             rgb_set_cab(2, gray32(cdc->led.side, false));
@@ -272,7 +274,7 @@ static void led_cmd(cdc_t *cdc)
             return;
 
         default:
-            printf("Ignoring LED Cmd %02x\n", cdc->hdr.cmd);
+            DEBUG(led, "Ignoring LED Cmd %02x\n", cdc->hdr.cmd);
             break;
     }
 

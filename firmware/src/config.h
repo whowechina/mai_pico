@@ -52,6 +52,10 @@ typedef struct __attribute__((packed)) {
 typedef struct {
     uint16_t fps[2];
     bool key_stuck;
+    struct {
+        bool touch;
+        bool led;
+    } debug;
 } mai_runtime_t;
 
 extern mai_cfg_t *mai_cfg;
