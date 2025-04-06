@@ -81,9 +81,16 @@ void hid_update()
 
     if (mai_cfg->hid.io4) {
         gen_io4_report();
-        if ((memcmp(&hid_io4, &sent_hid_io4, sizeof(hid_io4)) != 0) &&
-            tud_hid_report(REPORT_ID_JOYSTICK, &hid_io4, sizeof(hid_io4))) {
-            sent_hid_io4 = hid_io4;
+        static uint64_t next_periodic_report = 0;
+        uint64_t now = time_us_64();
+        /* Somehow edge-triggering doesn't pass self-test, so periodic report
+           is also there, with a lower rate that doesn't crowd the bus. */
+        if ((memcmp(&hid_io4, &sent_hid_io4, sizeof(hid_io4)) != 0) ||
+            (now > next_periodic_report)) {
+            next_periodic_report = now + 4000; // 250Hz periodic report
+            if (tud_hid_report(REPORT_ID_JOYSTICK, &hid_io4, sizeof(hid_io4))) {
+                sent_hid_io4 = hid_io4;
+            }
         }
     }
 
