@@ -90,7 +90,6 @@ static void aime_run()
     if (tud_cdc_n_available(aime_intf)) {
         uint8_t buf[32];
         uint32_t count = tud_cdc_n_read(aime_intf, buf, sizeof(buf));
-
         for (int i = 0; i < count; i++) {
             aime_feed(buf[i]);
         }
@@ -133,27 +132,34 @@ static void runtime_ctrl()
     last_coin_button = coin_button;
 }
 
+static void main_frame()
+{
+    static uint64_t next_frame = 0;
+
+    sleep_until(next_frame);
+    next_frame += 1000;
+
+    tud_task();
+    io_update();
+
+    cli_run();
+
+    touch_update();
+    button_update();
+
+    hid_update();
+
+    cli_fps_count(0);
+}
+
 static void core0_loop()
 {
-    uint64_t next_frame = time_us_64();
-
     while(1) {
-        tud_task();
-        io_update();
+        main_frame();
 
-        cli_run();
         aime_run();
         save_loop();
-        cli_fps_count(0);
-
-        sleep_until(next_frame);
-        next_frame += 1000;
-
-        touch_update();
-        button_update();
-
         runtime_ctrl();
-        hid_update();
     }
 }
 
@@ -181,6 +187,7 @@ void init()
 
     nfc_attach_i2c(I2C_PORT);
     nfc_init();
+    nfc_set_wait_loop(main_frame);
     aime_init(cdc_aime_putc);
     aime_sub_mode(mai_cfg->aime.mode);
     aime_virtual_aic(mai_cfg->aime.virtual_aic);
