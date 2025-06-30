@@ -94,16 +94,19 @@ Before we start, I want to encourage you with some hobbyist builds.
   https://www.sparkfun.com/products/retired/9695  
   Before solder MP121 module to the main PCB board, remember to use a knife to **cut (unshort) the tiny trace that connects ADDR to the GND**. Please be careful not to cut more than necessary.  
   <img src="doc/mpr121_cut.png" width="40%">
-* Leave U5, U6, U7 area discrete components empty as we're using MPR121 module, not the chip.
-* 1x SN74LV1T34DBVR (SOT-23-5) level shifter (U8), if you can't find one, use a 0603 10ohm resistor (R4) as an alternative.  
+* Leave U5, U6, U7 area discrete components empty as we're using MPR121 module, not the chip. Please note that these components are removed in the newer version board.
+* 1x SN74LV1T34DBVR (SOT-23-5) level shifter (U8), if you can't find one, just use a 0603 10ohm resistor (R4) as an alternative. In newer version board, it's removed.  
   https://www.lcsc.com/product-detail/Buffer-Driver-Transceiver_Texas-Instruments-SN74LV1T34DBVR_C100024.html
-* 4x 0603 1uF (0.1~1uF all fine) capacitors (C1, C2, C3, C7), OPTIONAL, recommended.
+* 4x 0603 1uF (0.1~1uF all fine) capacitors (C1, C2, C3, C7), OPTIONAL, recommended. Please note that some are removed in the newer version board.
 * 16x WS2812B-3528 RGB LEDs (each button needs two).
 * 8x Kailh Choc v1 key switches, linear, 30gf to 45gf ones.  
   https://www.kailhswitch.com/mechanical-keyboard-switches/low-profile-key-switches/burnt-orange-switch.html
 * 1x PN532 NFC module and some thin wires, only needed if you want AIME.  
   https://www.elechouse.com/product/pn532-nfc-rfid-module-v4/  
   You need to solder it to the same I2C as the MPR121 (GPIO 6 and 7).
+* These are only for buttons with optical sensors.
+  * 8x 0603 220ohm resistors (R1, R2, R3, R4, R5, R6, R7, R8), they're current limiter.
+  * 8x 0603 5.1kohm resistors (R10, R11, R12, R13, R14, R15, R16), they're pull-up resistors. There's chance you don't need them, you can try without them first.
 
 ### ITO Glass
 * Find a service to make custom etching ITO coated glass. The AutoCAD file is `Production\CAD\mai_pico_ito_v*.dwg`. Use 2mm thickness, 10-20ohm sheet resistance ITO coated glass.

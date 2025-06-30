@@ -97,16 +97,19 @@ https://discord.gg/M8f2PPQFEA
 
   在将 MP121 模块焊接到主 PCB 板之前，记得用小刀**切断 ADDR 和 GND 之间的微小连线**，注意绝对不要切过头。  
   <img src="doc/mpr121_cut.png" width="40%">
-* 因为我们使用的是 MPR121 模块，而不是芯片，所以 U5、U6、U7 区域的离散组件留空。
-* 1x SN74LV1T34DBVR（SOT-23-5）电平转换器（U8），如果你找不到，可以用 0603 10ohm 电阻（R4）替代。
+* 因为我们使用的是 MPR121 模块，而不是芯片，所以 U5、U6、U7 区域的离散组件留空（新版里已经移除）。
+* 1x SN74LV1T34DBVR（SOT-23-5）电平转换器（U8），如果你找不到，就用 0603 10ohm 电阻（R4）替代，新版的设计里，它已经被移除。
   https://www.lcsc.com/product-detail/Buffer-Driver-Transceiver_Texas-Instruments-SN74LV1T34DBVR_C100024.html
-* 4x 0603 1uF（0.1~1uF 都可以）电容器（C1，C2，C3，C7），可选，推荐。
+* 4x 0603 1uF（0.1~1uF 都可以）电容器（C1，C2，C3，C7），可选，推荐。有些已经在新版本里移除。
 * 16x WS2812B-3528 RGB LED（每个按钮需要两个）。
 * 8x Kailh Choc v1 键盘开关，线性的，30gf 到 45gf 的。
   https://www.kailhswitch.com/mechanical-keyboard-switches/low-profile-key-switches/burnt-orange-switch.html
 * 1x PN532 NFC 模块和一些细电线, 只有需要 AIME 的时候才用得上.  
   https://www.elechouse.com/product/pn532-nfc-rfid-module-v4/  
   你需要把它焊接到 MPR121 所在的 I2C 总线上（GPIO 6 and 7）。
+* 以下仅适用于使用了光电开关的按钮。
+  * 8x 0603 220ohm 电阻（R1，R2，R3，R4，R5，R6，R7，R8），它们是限流电阻。
+  * 8x 0603 5.1kohm 电阻（R10，R11，R12，R13，R14，R15，R16），它们是上拉电阻。可能不需要，你可以先试试不焊接。
 
 ### ITO 玻璃
 * 找一个服务定制蚀刻 ITO 镀膜玻璃。AutoCAD 文件是 `Production\CAD\mai_pico_ito_v*.dwg`。使用 2mm 厚，10-20ohm 平方电阻的 ITO 镀膜玻璃。  
