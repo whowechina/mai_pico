@@ -2,4 +2,5 @@ Production/PCB/*/
 *-backups
 .editorconfig
 .vscode
-
+build/
+firmware/mai_pico.uf2
