@@ -5,6 +5,7 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include "hardware/i2c.h"
 
 #include "mpr121.h"
@@ -194,17 +195,27 @@ void mpr121_filter(uint8_t addr, uint8_t ffi, uint8_t sfi, uint8_t esi)
     mpr121_resume(addr, ecr);
 }
 
-void mpr121_sense(uint8_t addr, int8_t sense, int8_t *sense_keys, int num)
-{
-    uint8_t ecr = mpr121_stop(addr);
-    for (int i = 0; i < num; i++) {
-        int8_t delta = sense + sense_keys[i];
-        write_reg(addr, MPR121_TOUCH_THRESHOLD_REG + i * 2,
-                        TOUCH_THRESHOLD_BASE - delta);
-        write_reg(addr, MPR121_RELEASE_THRESHOLD_REG + i * 2,
-                        RELEASE_THRESHOLD_BASE - delta / 2);
-    }
-    mpr121_resume(addr, ecr);
+void mpr121_sense(uint8_t addr, int8_t sense, int8_t *sense_keys, int num) {
+  uint8_t ecr = mpr121_stop(addr);
+  for (int i = 0; i < num; i++) {
+    int8_t delta = sense + sense_keys[i];
+
+    // Calculate the touch and release thresholds
+    uint8_t touch_threshold = TOUCH_THRESHOLD_BASE - delta;
+    uint8_t release_threshold = (RELEASE_THRESHOLD_BASE - delta) / 2;
+
+    write_reg(addr, MPR121_TOUCH_THRESHOLD_REG + i * 2, touch_threshold);
+    write_reg(addr, MPR121_RELEASE_THRESHOLD_REG + i * 2, release_threshold);
+
+    // Print the values to the console
+    printf("MPR121 Addr: 0x%02X, Key %d:\n", addr, i);
+    printf("  Delta: %d\n", delta);
+    printf("  Touch Threshold: %u (0x%02X)\n", touch_threshold,
+           touch_threshold);
+    printf("  Release Threshold: %u (0x%02X)\n", release_threshold,
+           release_threshold);
+  }
+  mpr121_resume(addr, ecr);
 }
 
 void mpr121_debounce(uint8_t addr, uint8_t touch, uint8_t release)
