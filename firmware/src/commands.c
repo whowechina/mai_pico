@@ -19,8 +19,8 @@
 #include "aime.h"
 #include "nfc.h"
 
-#define SENSE_LIMIT_MAX 9
-#define SENSE_LIMIT_MIN -9
+#define SENSE_LIMIT_MAX 20
+#define SENSE_LIMIT_MIN -128
 
 static void disp_rgb()
 {
@@ -309,47 +309,58 @@ static int8_t *extract_key(const char *param)
     return &mai_cfg->sense.zones[offsets[zone] + id];
 }
 
-static void sense_do_op(int8_t *target, char op)
+static void sense_do_op(int8_t *target, const char *op)
 {
-    if (op == '+') {
+    if (strcmp(op, "+") == 0) {
         if (*target < SENSE_LIMIT_MAX) {
             (*target)++;
         }
-    } else if (op == '-') {
+    } else if (strcmp(op, "-") == 0) {
         if (*target > SENSE_LIMIT_MIN) {
             (*target)--;
         }
-    } else if (op == '0') {
-        *target = 0;
+    } else {
+        char *endptr;
+        long val = strtol(op, &endptr, 10);
+
+        // Check if the string is a valid number and it is within range
+        if (*op != '\0' && *endptr == '\0' && val >= SENSE_LIMIT_MIN && val <= SENSE_LIMIT_MAX) {
+            *target = (int8_t)val;
+        }
     }
 }
 
 static void handle_sense(int argc, char *argv[])
 {
-    const char *usage = "Usage: sense [key|*] <+|-|0>\n"
+    const char *usage = "Usage: sense [key|*] <+|-|value>\n"
                         "Example:\n"
                         "  >sense +\n"
                         "  >sense -\n"
                         "  >sense A3 +\n"
                         "  >sense C1 -\n"
-                        "  >sense * 0\n";
+                        "  >sense * 5\n"
+                        "  >sense A3 10\n";
     if ((argc < 1) || (argc > 2)) {
         printf(usage);
         return;
     }
 
     const char *op = argv[argc - 1];
-    if ((strlen(op) != 1) || !strchr("+-0", op[0])) {
+    char *endptr;
+    strtol(op, &endptr, 10); // Used to check if op is a number
+
+    // Validate that the operation is "+", "-", or a valid number string.
+    if (strcmp(op, "+") != 0 && strcmp(op, "-") != 0 && (*op == '\0' || *endptr != '\0')) {
         printf(usage);
         return;
     }
 
     if (argc == 1) {
-        sense_do_op(&mai_cfg->sense.global, op[0]);
+        sense_do_op(&mai_cfg->sense.global, op);
     } else {
         if (strcmp(argv[0], "*") == 0) {
             for (int i = 0; i < sizeof(mai_cfg->sense.zones); i++) {
-                sense_do_op(&mai_cfg->sense.zones[i], op[0]);
+                sense_do_op(&mai_cfg->sense.zones[i], op);
             }
         } else {
             int8_t *key = extract_key(argv[0]);
@@ -357,7 +368,7 @@ static void handle_sense(int argc, char *argv[])
                 printf(usage);
                 return;
             }
-            sense_do_op(key, op[0]);
+            sense_do_op(key, op);
         }
     }
 
