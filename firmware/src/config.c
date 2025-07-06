@@ -78,12 +78,12 @@ static void config_loaded()
         mai_cfg->sense = default_cfg.sense;
         config_changed();
     }
-    if (!in_range(mai_cfg->sense.global, -9, 9)) {
+    if (!in_range(mai_cfg->sense.global, -128, 127)) {
         mai_cfg->sense = default_cfg.sense;
         config_changed();
     }
     for (int i = 0; i < 34; i++) {
-        if (!in_range(mai_cfg->sense.zones[i], -9, 9)) {
+        if (!in_range(mai_cfg->sense.zones[i], -128, 127)) {
             mai_cfg->sense = default_cfg.sense;
             config_changed();
             break;
