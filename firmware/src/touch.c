@@ -182,6 +182,15 @@ const uint16_t *map_raw_to_zones(const uint16_t* raw)
     return zones;
 }
 
+const int8_t *unmap_sense_to_raw(const int8_t* memsense)
+{
+    static int8_t outsense[36];
+    for(int i = 0; i < 34; i++) {
+        outsense[i] = memsense[touch_map[i]];
+    }
+    return outsense;
+}
+
 bool touch_touched(unsigned key)
 {
     if (key >= 34) {
@@ -210,13 +219,14 @@ void touch_reset_stat()
 
 void touch_update_config()
 {
+    const int8_t* outsense = unmap_sense_to_raw((const int8_t*)mai_cfg->sense.zones);
     for (int m = 0; m < 3; m++) {
         mpr121_debounce(MPR121_BASE_ADDR + m,
                         mai_cfg->sense.debounce_touch,
                         mai_cfg->sense.debounce_release);
         mpr121_sense(MPR121_BASE_ADDR + m,
                      mai_cfg->sense.global,
-                     mai_cfg->sense.zones + m * 12,
+                     (int8_t*)outsense + m * 12,
                      m != 2 ? 12 : 10);
         mpr121_filter(MPR121_BASE_ADDR + m,
                       mai_cfg->sense.filter >> 6,
