@@ -202,7 +202,10 @@ void mpr121_sense(uint8_t addr, int8_t sense, int8_t *sense_keys, int num) {
 
     // Calculate the touch and release thresholds
     uint8_t touch_threshold = TOUCH_THRESHOLD_BASE - delta;
-    uint8_t release_threshold = (RELEASE_THRESHOLD_BASE - delta) / 2;
+    uint8_t release_threshold = RELEASE_THRESHOLD_BASE - (delta / 2);
+    if(release_threshold > touch_threshold) {
+        release_threshold = touch_threshold/2;
+    }
 
     write_reg(addr, MPR121_TOUCH_THRESHOLD_REG + i * 2, touch_threshold);
     write_reg(addr, MPR121_RELEASE_THRESHOLD_REG + i * 2, release_threshold);
