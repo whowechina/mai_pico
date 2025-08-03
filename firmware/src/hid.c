@@ -26,7 +26,7 @@ struct __attribute__((packed)) {
 
 static uint16_t native_to_io4(uint16_t button)
 {
-    static const int target_pos[] = { 2, 3, 0, 15, 14, 13, 12, 11, 1, 9, 6 };
+    static const int target_pos[] = { 2, 3, 0, 15, 14, 13, 12, 11, 9, 6, 1 };
     uint16_t io4btn = 0;
     for (int i = 0; i < 8; i++) {
         bool pressed = button & (1 << i);
